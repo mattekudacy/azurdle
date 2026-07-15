@@ -1,0 +1,84 @@
+name: Generate daily puzzle
+
+# Generation writes straight to Supabase as `queued` — there is no git file,
+# no PR, and no human review step. calibrate() (shortlistability +
+# fact/structure checks, all model-graded) is the entire review gate. Puzzle
+# answers (including up to 14 days of unplayed future puzzles under the
+# rolling buffer) must never touch git in a repo that may go public. See
+# CLAUDE.md for the rationale.
+#
+# Provider: GitHub Models (the default — no MODEL_PROVIDER set) is the
+# standing production provider. Ollama Cloud is a local-only dev/testing
+# convenience, never used in this cron. See CLAUDE.md's "Generation
+# pipeline" section for why.
+on:
+  schedule:
+    # 00:00 UTC daily — see CLAUDE.md: puzzle dates/rollover are always UTC,
+    # never local time.
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate puzzle for today+14
+        env:
+          GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run generate:puzzle
+
+      - name: Validate content
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run validate:content
+
+      # Auto-replenish: if the reserve pool is below the minimum
+      # check-queue.ts alerts on, generate one extra reserve puzzle today.
+      # Runs on top of the normal queued generation above, not instead of
+      # it — see CLAUDE.md on why the reserve pool exists.
+      - name: Check reserve pool level
+        id: reserve
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: echo "count=$(npm run --silent reserve:count)" >> "$GITHUB_OUTPUT"
+
+      - name: Top up reserve pool
+        if: steps.reserve.outputs.count < 5
+        env:
+          GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run generate:reserve
+
+  check-queue:
+    needs: generate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check queue buffer and reserve pool
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run check:queue

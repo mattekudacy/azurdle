@@ -1,0 +1,291 @@
+# CLAUDE.md
+
+<!-- BEGIN:nextjs-agent-rules -->
+## This is NOT the Next.js you know
+
+This project uses Next.js 16, which has breaking changes vs. earlier versions in your
+training data — APIs, conventions, and file structure may differ. Read the relevant guide
+in `node_modules/next/dist/docs/` before writing Next.js-specific code. Heed deprecation
+notices.
+<!-- END:nextjs-agent-rules -->
+
+## Project overview
+
+**Azurdle** is a daily "Doctordle-style" guessing game for Azure services. Every day, all
+players get the same puzzle: a hidden Azure service revealed through 5 progressive clues
+that go from a broad business problem to a dead giveaway. Players have 5 guesses; each
+wrong guess or skip reveals the next clue. Fewer clues used = better rating.
+
+Everything must run on **free tiers** — this project's budget is $0/month. Never introduce
+a dependency, plan upgrade, or paid service without flagging it explicitly.
+
+## Stack
+
+- **Hosting:** Vercel Hobby tier (non-commercial license — no ads/monetization without Pro).
+- **Framework:** Next.js (App Router, TypeScript). Frontend + API route handlers in one
+  repo, deployed on push to `main`.
+- **Database + auth:** Supabase free tier (Postgres, OAuth sign-in, row-level security).
+  Use `@supabase/ssr` for session handling in Next.js.
+- **Puzzle generation:** GitHub Models (free inference via PAT) — build-time drafting
+  tool ONLY, never a runtime dependency. See "Puzzle content" below.
+- **Domain:** `<name>.is-a.software` (free subdomain, CNAME → `cname.vercel-dns.com`).
+  The domain lives in exactly ONE env var. Never hardcode it in components or share text.
+
+## Repo visibility
+
+This repo is **public**. That's why puzzle content never touches git (see "Puzzle
+content" below) — a public repo's file history is permanent and readable by anyone,
+which would leak up to 14 days of unplayed future puzzles under the rolling buffer if
+answers were ever committed here. Generation writes straight to Supabase instead.
+
+Anonymous players can play today's puzzle (progress in localStorage). Signing in unlocks
+the archive of past unfinished puzzles and syncs progress. On first sign-in, migrate
+localStorage progress to the user's account, then clear it.
+
+## Critical security rule: the answer never leaves the server
+
+This is the load-bearing design decision. Original Wordle shipped its answer list to the
+client and was datamined within days. Do not repeat that mistake.
+
+- The client only ever receives **revealed** clues, one at a time.
+- `GET /api/puzzle/today` returns clue 1 only — never the answer, never clues 2–5.
+- `POST /api/guess` validates server-side and returns `{ correct, nextClue?, gameOver? }`.
+- The answer is included in a response ONLY after the game ends (solved or out of guesses).
+
+**Supabase-specific enforcement:**
+
+- The `puzzles` table is SERVER-ONLY. RLS denies ALL access for `anon` and `authenticated`
+  roles. Only API route handlers read it, using the service-role key.
+- The service-role key (`SUPABASE_SERVICE_ROLE_KEY`) is server-only: never in client code,
+  never in `NEXT_PUBLIC_*` env vars, never logged.
+- The client NEVER queries `puzzles` directly — not even for metadata. All puzzle data
+  flows through the API routes. Treat any client-side Supabase query against `puzzles`
+  as a bug.
+- `attempts` MAY be accessed from the client under RLS policy `user_id = auth.uid()`
+  (select/insert/update own rows only).
+- The autocomplete vocabulary (service names + decoys, no answers) is safe to ship to
+  the client as a static JSON asset.
+
+## Database schema (Supabase Postgres)
+
+```sql
+-- server-only: RLS enabled, no policies for anon/authenticated
+create table puzzles (
+  date         date primary key,
+  number       int unique not null,
+  answer       text not null,
+  aliases      text[] not null default '{}',
+  clues        jsonb not null,            -- array of exactly 5 strings
+  category     text not null,
+  difficulty   text not null check (difficulty in ('easy','medium','hard')),
+  status       text not null default 'queued'
+               check (status in ('queued','live','retired','reserve')),
+  created_at   timestamptz not null default now()
+);
+
+-- client-accessible under RLS: user_id = auth.uid()
+create table attempts (
+  user_id        uuid references auth.users not null,
+  puzzle_date    date not null,
+  guesses        jsonb not null default '[]',
+  clues_revealed int not null default 1,
+  solved         boolean not null default false,
+  completed_at   timestamptz,
+  primary key (user_id, puzzle_date)
+);
+```
+
+Conventions:
+
+- Puzzle dates and the daily rollover are **UTC**. "Today's puzzle" = row where
+  `date = current UTC date`. Never use server local time or client time.
+- One `attempts` row per user per puzzle date — upsert on conflict.
+- Auth users come from Supabase Auth (`auth.users`); do not build a parallel users table
+  unless profile fields are actually needed.
+
+## API surface
+
+| Endpoint                 | Auth      | Behavior                                                                                     |
+| ------------------------ | --------- | -------------------------------------------------------------------------------------------- |
+| `GET /api/puzzle/today`  | anonymous | Puzzle number, date, category, clue 1. Merges saved progress if signed in.                   |
+| `POST /api/guess`        | anonymous | Body `{ date, guess }`. Validates, returns result + next clue. Upserts attempt if signed in. |
+| `GET /api/archive`       | required  | Past puzzle dates with the user's completion state.                                          |
+| `GET /api/puzzle/[date]` | required  | Past puzzle (clues up to the user's progress). Reject future dates.                          |
+| `POST /api/migrate`      | required  | One-time import of localStorage progress after first sign-in.                                |
+
+Rules:
+
+- Reject guesses for future dates and for puzzles the user already solved.
+- Rate-limit `POST /api/guess` (~10/min per IP/session) — the answer space is only ~200
+  services and must not be brute-forceable. Simple per-IP check is fine initially.
+- Guess matching: normalize both sides (lowercase, strip `azure `/`microsoft ` prefix,
+  strip non-alphanumerics), then compare against `answer` and `aliases`.
+  Aliases matter: "AKS" ≡ "Azure Kubernetes Service"; "Azure AD" ≡ "Microsoft Entra ID".
+
+## Puzzle content: the clue ladder
+
+Every puzzle has exactly 5 clues following this ladder. Each clue should roughly halve
+the candidate set (clue 1 fits ~15 services, clue 5 fits exactly 1):
+
+1. **The problem, with one fingerprint.** Plain business language, no Azure jargon, but
+   containing one distinctive detail that gives an expert a genuine (~30–40%) shot.
+   Test: could a certified Azure architect name the service from this sentence alone,
+   better than chance? Could a junior dev? The answer should be yes/no respectively.
+2. **The constraint** that eliminates half the candidates.
+3. **The architecture behavior** — narrows to a category or 2–3 sibling services.
+4. **The telltale term of art** — vocabulary only this service (and maybe one close
+   confuser) uses. Prefer terms that distinguish commonly confused pairs
+   (Functions vs Logic Apps, Load Balancer vs Application Gateway, Service Bus vs Event Hubs).
+5. **The giveaway** — AWS equivalent, abbreviation, or unique product fact.
+
+Content rules:
+
+- Avoid clues that go stale: no exact prices, no tier names Microsoft shuffles often.
+  Service renames happen (Azure AD → Entra ID) — put old names in `aliases`.
+- The daily cron maintains a rolling 14-day queued buffer (see pipeline below), plus a
+  reserve pool of ~10 evergreen puzzles as the runtime fallback.
+
+### Generation pipeline (AI model + daily cron)
+
+Puzzles are generated by a **daily GitHub Actions scheduled workflow** — not Vercel cron
+(Hobby cron and function timeouts are too limited for a multi-call generation job, and
+provider credentials already live in Actions secrets).
+
+**Provider: GitHub Models (the default) is the standing production provider** — used
+by the daily Actions cron. `scripts/lib/model-provider.ts` reads `MODEL_PROVIDER`
+(unset or anything other than `"ollama"` → GitHub Models; `"ollama"` → Ollama Cloud)
+and routes every call through the matching client (`github-models.ts` or
+`ollama-cloud.ts`), each exposing the same `chatComplete(model, messages, options)`
+signature.
+
+**Ollama Cloud is a local-only dev/testing convenience, never used in the production
+cron.** Set `MODEL_PROVIDER=ollama` locally when iterating on the generation pipeline
+(e.g. GitHub Models' free-tier rate limit is exhausted mid-session) — never set it in
+the daily workflow's Actions secrets. Its free tier ("Light usage") has tighter
+session/weekly caps than makes sense for anything beyond ad hoc local testing.
+
+Both providers are build/cron-time tools ONLY — never call either from app runtime
+(adds latency, hits rate limits, and is a hard dependency the running app should never
+have).
+
+**Buffer rule — the single most important pipeline invariant:** the cron generates the
+puzzle for **today + 14 days**, never for today or tomorrow. The queue is a rolling
+two-week buffer. A failed run just shrinks the buffer by one day and the next run
+catches up; it never breaks the live game.
+
+**Puzzle content never touches git.** This repo is public — generation writes directly
+to Supabase as `status = 'queued'` instead of committing a JSON file and opening a PR.
+See "Repo visibility" above for why.
+
+**There is no human review step.** `calibrate()` (`scripts/lib/calibration.ts`) is the
+entire review gate — two model-graded checks run inline before a puzzle is ever
+inserted:
+
+1. **Difficulty (clues 1–3):** feed clues 1–3 → if the model cannot shortlist the
+   service, the ladder is too vague → regenerate.
+2. **Fact/structure check:** feed the full answer + clues to a model and ask it to
+   verify the same things a human reviewer used to check — facts correct and current,
+   clue 5 identifies exactly one service, and clues strictly increase in specificity
+   with no earlier clue giving it away. Any failure → regenerate.
+
+**A third check — clue-1 solo-guess difficulty — was tried and removed.** It sampled 5
+guesses from clue 1 alone and rejected the puzzle if an LLM landed the answer 4+ of 5
+times. In practice it rejected nearly every draft (routinely 5/5), even after two
+rounds of prompt tuning and a targeted revise-clue-1-with-feedback loop. A blind human
+read of the actual rejected clues (with the answer hidden) settled it: they read as
+genuinely fair and ambiguous — the check was measuring "can a top-tier LLM
+pattern-match a service from a business description," which is a much narrower, sharper
+skill than "would a human Azure professional find this appropriately hard" (the actual
+target — PRODUCT.md's audience is human Azure engineers, not an AI judge). **Do not
+re-add an automated clue-1 solvability check without first doing a human blind read of
+several real rejected/accepted clues** — this exact mistake (optimizing an LLM proxy
+metric instead of checking it against a human read) cost a full session of debugging
+before anyone looked at the actual clue text.
+
+Cap at `MAX_REGENERATION_ATTEMPTS` (3) attempts, each a full redraft (one API call
+drafts the answer + all 5 clues together). After the cap, fail the run (the 14-day
+buffer absorbs it).
+
+Daily workflow (`.github/workflows/generate-puzzle.yml`):
+
+1. `scripts/generate-puzzles.ts` calls the active provider with a prompt embedding the
+   full clue-ladder spec, the JSON schema, AND the list of answers used in the last 90
+   days (to exclude — with ~200 featurable services, duplicate pressure is real).
+2. Structural validation: schema check (exactly 5 clues, valid category/difficulty,
+   non-empty aliases), no duplicate answer within the 90-day window.
+3. `calibrate()` (the two checks above) — any failure discards the puzzle and
+   redrafts from scratch.
+4. On success: **insert the row directly into Supabase** with `status = 'queued'` and
+   a real `date`/`number` already assigned (today+14, next sequential number). It's
+   immediately servable once its date arrives — no further gate.
+
+**Reserve pool fallback:** keep ~10 evergreen puzzles with `status = 'reserve'`. If
+`GET /api/puzzle/today` finds no queued/live puzzle for the current UTC date (empty
+buffer, yanked puzzle), it serves the next reserve puzzle instead and marks it used.
+The failure mode must always be "a reserve puzzle ran", never "the site had no
+puzzle". Alert (Actions issue/email) when reserves drop below 5 or the queued buffer
+drops below 7 days.
+
+General rules:
+
+- Whichever AI provider is active is a build/cron-time tool ONLY. Never call it from
+  app runtime — free tiers are rate-limited and it would add latency and a hard
+  dependency. Back off and retry on 429s inside the client (both providers implement
+  this the same way).
+- Provider credentials (`GITHUB_MODELS_TOKEN`, `OLLAMA_API_KEY`) live in Actions
+  secrets / local env vars only. Never committed.
+- Generated output goes straight into Supabase as `queued` — NEVER into a
+  git-committed file. There is no human approval step; `calibrate()` is the only gate,
+  so if you touch that function or its threshold, you're changing what the ENTIRE
+  review process catches.
+
+## Frontend conventions
+
+- Keep the bundle small. Game state machine: clue reveal → guess → result → share.
+- Share text is the growth loop and must be spoiler-free:
+  `Azurdle #47 — solved on clue 2` plus a filled/empty square row. Built from puzzle
+  number and clue count only — never the answer or clue text.
+- localStorage: one versioned key (e.g. `azurdle.v1`) holding guess history and UI state
+  per puzzle date. Never store anything answer-adjacent. Shape must map cleanly onto the
+  `attempts` row for `/api/migrate`.
+- Accessible by default: fully playable by keyboard; clue reveals announced via aria-live.
+
+## Free-tier guardrails (do not violate)
+
+- Vercel Hobby only. If a feature would require Pro, say so before building it.
+- Supabase free tier: watch the project-pause-on-inactivity policy. A scheduled ping
+  (GitHub Actions cron hitting a health endpoint) keeps it awake pre-launch.
+- GitHub Models free tier is rate-limited: batch generation, backoff on 429s.
+- No paid dependencies, no services requiring a credit card.
+
+## Commands
+
+```bash
+npm run dev               # next dev
+npm run build             # must pass with zero puzzle data in client chunks
+npm run test              # guess normalization, clue gating, and RLS assumptions first
+npm run lint
+npm run generate:puzzle   # generate puzzle for today+14, writes to Supabase as queued (no human gate)
+npm run validate:content  # schema + duplicate-window checks against Supabase puzzle rows
+npm run calibrate         # standalone re-check: difficulty + fact/structure calibration via GitHub Models
+npm run check:queue       # warn if queued buffer < 7 days or reserves < 5
+```
+
+## Things Claude should NOT do
+
+- Never log or return the answer, unrevealed clues, or the service-role key.
+- Never move validation logic client-side "for responsiveness."
+- Never query the `puzzles` table from client code, and never weaken its RLS.
+- Never put the service-role key or the GitHub Models PAT in `NEXT_PUBLIC_*` vars or
+  commit `.env*` files.
+- Never commit puzzle content (answers, clues) to git in any form — this repo is public;
+  generation writes straight to Supabase as `queued`.
+- Never weaken `passesCalibration()` without deliberate intent — there is no human
+  review step behind it. It is the only thing standing between a bad AI-generated
+  puzzle and every player seeing it.
+- Never generate the puzzle for today/tomorrow — always today+14 (the buffer is the
+  safety net; do not bypass it).
+- Never call GitHub Models from runtime request paths.
+- Never change the UTC rollover or puzzle numbering scheme — both are contracts with
+  players' streaks and share texts.
+- Never add a paid dependency or plan upgrade without flagging it.

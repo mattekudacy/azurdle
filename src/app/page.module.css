@@ -1,0 +1,97 @@
+.page {
+  display: flex;
+  flex: 1;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--surface);
+  background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--space-lg);
+  background: var(--topbar);
+  color: #fff;
+}
+
+.topbarIcon {
+  height: auto;
+  width: 22px;
+  /* The logo mark is Azure Blue on a transparent PNG; inverted so it
+     reads as white against the same-hue top bar instead of vanishing. */
+  filter: brightness(0) invert(1);
+}
+
+.topbarTitle {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.main {
+  display: flex;
+  width: 100%;
+  max-width: 560px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-lg);
+  margin: var(--space-xl) var(--space-md);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  box-shadow: var(--shadow-card);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: var(--space-xs);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.wordmarkIcon {
+  height: auto;
+  width: 32px;
+}
+
+.intro h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.intro p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .main {
+    margin: var(--space-lg) var(--space-sm);
+    padding: var(--space-md);
+  }
+}

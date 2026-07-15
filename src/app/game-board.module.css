@@ -1,0 +1,350 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.status {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* Matches the shape of .meta + two .clue rows so the loading state doesn't
+   jump when real content swaps in. */
+.skeletonLine,
+.skeletonClue {
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonMeta {
+  width: 96px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonClue {
+  height: 64px;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.retryButton {
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.retryButton:hover {
+  background: var(--surface);
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonLine,
+  .skeletonClue {
+    animation: none;
+  }
+}
+
+.meta {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.clueList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.clue {
+  position: relative;
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  padding: 14px var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 70ch;
+  /* Each clue mounts once (stable key) and never re-renders after, so this
+     only plays the moment a wrong guess reveals it — the clue ladder is the
+     plot, and each rung should visibly arrive. */
+  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A dashed pipeline tick through the gap above each clue after the first —
+   reads as a dependency chain between ladder rungs, echoing an
+   architecture-diagram connector without touching Microsoft's own palette. */
+.clue:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--space-sm));
+  left: 28px;
+  width: 0;
+  height: var(--space-sm);
+  border-left: 2px dashed var(--border);
+}
+
+.clueNumber {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* A clue shown for context after the game ends, past the point the player
+   actually reached — dimmed and set apart from the clues that were live. */
+.clueBonus {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.clueNumberBonus {
+  background: var(--muted);
+}
+
+.cloudLog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cloudLogLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.guessList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guessItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.guessItemIcon {
+  color: var(--muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* A miss is information, not an alarm (per DESIGN.md) — this is a small
+   horizontal jitter, not a red flash, and never fires on a correct guess. */
+.inputRowShake {
+  animation: inputShake 320ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes inputShake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+.input {
+  flex: 1;
+  padding: 12px 14px 12px 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--bg);
+  transition: border-color 150ms ease-out;
+}
+
+.input:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.button {
+  padding: 12px 22px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, transform 100ms ease-out;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resultBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 14px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  animation: reveal 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resultBannerWin {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.resultBannerLoss {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes clueReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.statusMessage {
+  min-height: 20px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .button,
+  .clue,
+  .guessItem,
+  .inputRowShake,
+  .resultBanner {
+    transition: none;
+    animation: none;
+  }
+}
