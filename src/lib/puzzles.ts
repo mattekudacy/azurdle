@@ -41,7 +41,7 @@ export async function serveReservePuzzleForDate(date: string): Promise<PuzzleRow
 
   const { data: reserve, error: reserveError } = await supabase
     .from("puzzles")
-    .select("date, number, answer, aliases, clues, category, difficulty, status")
+    .select("id, date, number, answer, aliases, clues, category, difficulty, status")
     .eq("status", "reserve")
     .limit(1)
     .maybeSingle();
@@ -49,9 +49,15 @@ export async function serveReservePuzzleForDate(date: string): Promise<PuzzleRow
   if (reserveError) throw reserveError;
   if (!reserve) return null;
 
+  // Excludes reserve rows (number: null) explicitly — Postgres sorts NULLs
+  // first in a DESC order by default, so without this filter the "max"
+  // query returns a reserve row's null instead of the true highest number,
+  // making every computed nextNumber wrong (found via the same production
+  // bug as the .eq("id", ...) fix above).
   const { data: maxRow, error: maxError } = await supabase
     .from("puzzles")
     .select("number")
+    .not("number", "is", null)
     .order("number", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -59,11 +65,15 @@ export async function serveReservePuzzleForDate(date: string): Promise<PuzzleRow
   if (maxError) throw maxError;
   const nextNumber = (maxRow?.number ?? 0) + 1;
 
+  // Match on id (see migration 0005) — reserve.date/number are null by
+  // design, and matching on them directly is both invalid (`.eq` against
+  // null sends the literal string "null", which Postgres rejects for a
+  // date column) and unsafe even if it worked (nothing else uniquely
+  // identifies a single reserve row).
   const { data: updated, error: updateError } = await supabase
     .from("puzzles")
     .update({ date, number: nextNumber, status: "live" })
-    .eq("date", reserve.date)
-    .eq("number", reserve.number)
+    .eq("id", reserve.id)
     .select("date, number, answer, aliases, clues, category, difficulty, status")
     .single();
 

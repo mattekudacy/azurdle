@@ -117,9 +117,14 @@ async function recentAnswers(supabase: ReturnType<typeof getAdminClient>): Promi
 }
 
 async function nextPuzzleNumber(supabase: ReturnType<typeof getAdminClient>): Promise<number> {
+  // Excludes reserve rows (number: null) explicitly — Postgres sorts NULLs
+  // first in a DESC order by default, so without this filter the "max"
+  // query can return a reserve row's null instead of the true highest
+  // number, making every computed nextNumber wrong.
   const { data, error } = await supabase
     .from("puzzles")
     .select("number")
+    .not("number", "is", null)
     .order("number", { ascending: false })
     .limit(1)
     .maybeSingle();
