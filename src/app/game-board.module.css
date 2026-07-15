@@ -3,6 +3,35 @@
   flex-direction: column;
   gap: var(--space-lg);
   width: 100%;
+  /* Fills the bounded height page.module.css's .main sets, so .scrollArea
+     below can claim "whatever's left" and scroll internally, while the
+     guess bar stays put — the fix for always having to scroll to answer. */
+  min-height: 0;
+  flex: 1;
+}
+
+.scrollArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-height: 0;
+  overflow-y: auto;
+  /* Small inset so content doesn't visually touch the card edge or hide
+     under a focus ring when scrolled to the top/bottom. */
+  padding-right: 2px;
+  margin-right: -2px;
+}
+
+.guessBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  flex-shrink: 0;
+  /* .board's own flex gap already spaces this from .scrollArea; the
+     border alone marks the boundary so scrolled clues don't read as
+     disconnected from the guess bar below them. */
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
 }
 
 .status {
@@ -110,6 +139,27 @@
      only plays the moment a wrong guess reveals it — the clue ladder is the
      plot, and each rung should visibly arrive. */
   animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Marks "this clue just arrived because that guess missed" — a brief
+   Azure-Blue border pulse that settles back to the resting border, layered
+   on top of the clueReveal fade. Stays in-hue (no red/amber) per DESIGN.md:
+   a miss is information, not an alarm. */
+.clueMissReveal {
+  animation:
+    clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    missHighlight 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes missHighlight {
+  0% {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px oklch(0.568 0.167 251.3 / 0.15);
+  }
+  100% {
+    border-color: var(--border);
+    box-shadow: none;
+  }
 }
 
 /* A dashed pipeline tick through the gap above each clue after the first —
@@ -341,6 +391,7 @@
   .input,
   .button,
   .clue,
+  .clueMissReveal,
   .guessItem,
   .inputRowShake,
   .resultBanner {

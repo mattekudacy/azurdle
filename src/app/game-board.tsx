@@ -50,7 +50,12 @@ export default function GameBoard() {
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [retryCount, setRetryCount] = useState(0);
+  // Index of the clue that just arrived because of a miss — drives a
+  // one-time highlight on that clue only, distinct from the fade-in every
+  // clue gets on mount. Cleared after the highlight animation finishes.
+  const [missRevealIndex, setMissRevealIndex] = useState<number | null>(null);
   const inputRowRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Retriggers the shake CSS animation on a rejected guess without
   // remounting the row (which would drop focus from the input/button).
@@ -148,6 +153,23 @@ export default function GameBoard() {
       if (!data.gameOver) {
         setStatusMessage("Not quite. Here's another clue.");
         shakeInputRow();
+        if (data.nextClue) {
+          const newClueIndex = cluesRevealedDuringPlay - 1;
+          setMissRevealIndex(newClueIndex);
+          // Matches the missHighlight animation's duration in
+          // game-board.module.css — clears the flag once it's done so a
+          // later miss can retrigger the same highlight on a new clue.
+          setTimeout(() => setMissRevealIndex(null), 900);
+          // The scroll area, not the page, holds the clue list now — bring
+          // the newly-revealed clue into view there instead of scrolling
+          // the window (which wouldn't move now that the guess bar is
+          // pinned and the clues scroll internally).
+          requestAnimationFrame(() => {
+            scrollAreaRef.current
+              ?.querySelector(`[data-clue-index="${newClueIndex}"]`)
+              ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          });
+        }
       }
     } finally {
       setSubmitting(false);
@@ -187,105 +209,114 @@ export default function GameBoard() {
 
   return (
     <div className={styles.board}>
-      <p className={styles.meta}>
-        Azurdle #{puzzle.number}
-        {progress.gameOver && ` · ${puzzle.category}`}
-      </p>
-
-      {progress.guesses.length > 0 && (
-        <section className={styles.cloudLog}>
-          <div className={styles.cloudLogLabel}>
-            <HistoryIcon />
-            <span>Cloud Log</span>
-          </div>
-          <ul className={styles.guessList}>
-            {progress.guesses.map((guess, i) => (
-              <li key={i} className={styles.guessItem}>
-                {!(progress.solved && i === progress.guesses.length - 1) && (
-                  <CloseIcon className={styles.guessItemIcon} />
-                )}
-                {guess}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <ol className={styles.clueList} aria-live="polite">
-        {progress.clues.map((clue, i) => {
-          const isBonusContext = progress.gameOver && i >= revealedDuringPlay;
-          return (
-            <li
-              key={i}
-              className={`${styles.clue} ${isBonusContext ? styles.clueBonus : ""}`}
-            >
-              <span className={`${styles.clueNumber} ${isBonusContext ? styles.clueNumberBonus : ""}`}>
-                {i + 1}
-              </span>
-              {clue}
-            </li>
-          );
-        })}
-      </ol>
-
-      {!progress.gameOver ? (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submitGuess(guessInput);
-          }}
-          className={styles.form}
-        >
-          <label htmlFor="guess" className={styles.label}>
-            Guess the Azure service ({guessesLeft} guess{guessesLeft === 1 ? "" : "es"} left)
-          </label>
-          <div ref={inputRowRef} className={styles.inputRow}>
-            <AutocompleteInput
-              id="guess"
-              value={guessInput}
-              onChange={setGuessInput}
-              onSubmitValue={submitGuess}
-              priorGuesses={progress.guesses}
-              disabled={submitting}
-              className={styles.input}
-            />
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                !guessInput.trim() ||
-                progress.guesses.some((prior) => normalizeGuess(prior) === normalizeGuess(guessInput))
-              }
-              className={styles.button}
-            >
-              Guess
-            </button>
-          </div>
-        </form>
-      ) : (
-        <>
-          <ResultSquares revealedDuringPlay={revealedDuringPlay} solved={progress.solved} />
-          <p
-            role="status"
-            aria-live="polite"
-            className={`${styles.resultBanner} ${
-              progress.solved ? styles.resultBannerWin : styles.resultBannerLoss
-            }`}
-          >
-            {progress.solved
-              ? `Solved on clue ${revealedDuringPlay}! The answer was ${progress.answer}.`
-              : `Out of guesses. The answer was ${progress.answer}.`}
-          </p>
-        </>
-      )}
-
-      {progress.gameOver && <NextPuzzleCountdown />}
-
-      {!progress.gameOver && (
-        <p role="status" aria-live="polite" className={styles.statusMessage}>
-          {statusMessage}
+      <div ref={scrollAreaRef} className={styles.scrollArea}>
+        <p className={styles.meta}>
+          Azurdle #{puzzle.number}
+          {progress.gameOver && ` · ${puzzle.category}`}
         </p>
-      )}
+
+        {progress.guesses.length > 0 && (
+          <section className={styles.cloudLog}>
+            <div className={styles.cloudLogLabel}>
+              <HistoryIcon />
+              <span>Cloud Log</span>
+            </div>
+            <ul className={styles.guessList}>
+              {progress.guesses.map((guess, i) => (
+                <li key={i} className={styles.guessItem}>
+                  {!(progress.solved && i === progress.guesses.length - 1) && (
+                    <CloseIcon className={styles.guessItemIcon} />
+                  )}
+                  {guess}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <ol className={styles.clueList} aria-live="polite">
+          {progress.clues.map((clue, i) => {
+            const isBonusContext = progress.gameOver && i >= revealedDuringPlay;
+            const isMissReveal = i === missRevealIndex;
+            return (
+              <li
+                key={i}
+                data-clue-index={i}
+                className={`${styles.clue} ${isBonusContext ? styles.clueBonus : ""} ${
+                  isMissReveal ? styles.clueMissReveal : ""
+                }`}
+              >
+                <span className={`${styles.clueNumber} ${isBonusContext ? styles.clueNumberBonus : ""}`}>
+                  {i + 1}
+                </span>
+                {clue}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+
+      <div className={styles.guessBar}>
+        {!progress.gameOver ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitGuess(guessInput);
+            }}
+            className={styles.form}
+          >
+            <label htmlFor="guess" className={styles.label}>
+              Guess the Azure service ({guessesLeft} guess{guessesLeft === 1 ? "" : "es"} left)
+            </label>
+            <div ref={inputRowRef} className={styles.inputRow}>
+              <AutocompleteInput
+                id="guess"
+                value={guessInput}
+                onChange={setGuessInput}
+                onSubmitValue={submitGuess}
+                priorGuesses={progress.guesses}
+                disabled={submitting}
+                className={styles.input}
+                openUpward
+              />
+              <button
+                type="submit"
+                disabled={
+                  submitting ||
+                  !guessInput.trim() ||
+                  progress.guesses.some((prior) => normalizeGuess(prior) === normalizeGuess(guessInput))
+                }
+                className={styles.button}
+              >
+                Guess
+              </button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <ResultSquares revealedDuringPlay={revealedDuringPlay} solved={progress.solved} />
+            <p
+              role="status"
+              aria-live="polite"
+              className={`${styles.resultBanner} ${
+                progress.solved ? styles.resultBannerWin : styles.resultBannerLoss
+              }`}
+            >
+              {progress.solved
+                ? `Solved on clue ${revealedDuringPlay}! The answer was ${progress.answer}.`
+                : `Out of guesses. The answer was ${progress.answer}.`}
+            </p>
+          </>
+        )}
+
+        {progress.gameOver && <NextPuzzleCountdown />}
+
+        {!progress.gameOver && (
+          <p role="status" aria-live="polite" className={styles.statusMessage}>
+            {statusMessage}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

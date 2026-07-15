@@ -47,6 +47,12 @@
   border: 1px solid var(--border);
   background-color: var(--bg);
   box-shadow: var(--shadow-card);
+  /* Bounds the card to the viewport (minus the topbar + this card's own
+     top/bottom margin) so GameBoard's guess bar never scrolls off-screen —
+     the clue list scrolls internally instead. overflow: hidden hands that
+     job to GameBoard's own scroll region, not this element. */
+  max-height: calc(100dvh - 48px - 2 * var(--space-xl));
+  overflow: hidden;
 }
 
 .header {
@@ -54,6 +60,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
+  flex-shrink: 0;
 }
 
 .intro {

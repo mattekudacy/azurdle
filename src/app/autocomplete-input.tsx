@@ -20,6 +20,9 @@ type AutocompleteInputProps = {
   priorGuesses?: string[];
   disabled?: boolean;
   className?: string;
+  // The guess bar is pinned to the bottom of the viewport, so the dropdown
+  // must open upward from the input instead of downward off-screen.
+  openUpward?: boolean;
 };
 
 let vocabPromise: Promise<string[]> | null = null;
@@ -36,6 +39,7 @@ export default function AutocompleteInput({
   priorGuesses = [],
   disabled,
   className,
+  openUpward,
 }: AutocompleteInputProps) {
   const [vocab, setVocab] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -119,7 +123,11 @@ export default function AutocompleteInput({
         className={className}
       />
       {open && suggestions.length > 0 && (
-        <ul id={listboxId} role="listbox" className={styles.suggestions}>
+        <ul
+          id={listboxId}
+          role="listbox"
+          className={`${styles.suggestions} ${openUpward ? styles.suggestionsUp : ""}`}
+        >
           {suggestions.map((service, i) => {
             const tried = isTried(service);
             return (

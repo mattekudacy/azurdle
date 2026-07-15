@@ -26,6 +26,14 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: var(--bg);
+  box-shadow: var(--shadow-card);
+}
+
+/* The guess bar is pinned to the bottom of the viewport, so the dropdown
+   opens upward from the input instead of downward off-screen. */
+.suggestionsUp {
+  top: auto;
+  bottom: calc(100% + var(--space-xs));
 }
 
 .suggestion,
