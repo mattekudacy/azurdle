@@ -232,8 +232,11 @@ General rules:
   app runtime — free tiers are rate-limited and it would add latency and a hard
   dependency. Back off and retry on 429s inside the client (both providers implement
   this the same way).
-- Provider credentials (`GITHUB_MODELS_TOKEN`, `OLLAMA_API_KEY`) live in Actions
-  secrets / local env vars only. Never committed.
+- Provider credentials (`GITHUB_MODELS_TOKEN`, `OLLAMA_API_KEY`) live in local env vars
+  only, never committed. In GitHub Actions, the PAT is stored under the secret name
+  `MODELS_PAT` (Actions rejects secret names starting with `GITHUB_` — reserved for
+  GitHub's own auto-populated vars) and mapped onto the `GITHUB_MODELS_TOKEN` env var
+  name inside the workflow, which is what the code actually reads.
 - Generated output goes straight into Supabase as `queued` — NEVER into a
   git-committed file. There is no human approval step; `calibrate()` is the only gate,
   so if you touch that function or its threshold, you're changing what the ENTIRE

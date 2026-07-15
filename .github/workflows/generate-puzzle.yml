@@ -33,7 +33,7 @@ jobs:
 
       - name: Generate puzzle for today+14
         env:
-          GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+          GITHUB_MODELS_TOKEN: ${{ secrets.MODELS_PAT }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run generate:puzzle
@@ -58,7 +58,7 @@ jobs:
       - name: Top up reserve pool
         if: steps.reserve.outputs.count < 5
         env:
-          GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+          GITHUB_MODELS_TOKEN: ${{ secrets.MODELS_PAT }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run generate:reserve
