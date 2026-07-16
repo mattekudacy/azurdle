@@ -1,6 +1,6 @@
 # Azurdle
 
-A daily "Doctordle-style" guessing game for Azure services. See `CLAUDE.md` for the
+A daily Wordle-style guessing game for Azure services. See `CLAUDE.md` for the
 full design spec, security rules, database schema, and content pipeline.
 
 ## Getting started
