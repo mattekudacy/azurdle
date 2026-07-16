@@ -1,7 +1,8 @@
 # Azurdle
 
 A daily Wordle-style guessing game for Azure services. See `CLAUDE.md` for the
-full design spec, security rules, database schema, and content pipeline.
+full design spec, security rules, database schema, and content pipeline. See
+`ROADMAP.md` for known gaps not yet scheduled for work.
 
 ## Getting started
 

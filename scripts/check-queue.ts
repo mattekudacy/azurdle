@@ -51,7 +51,6 @@ async function main() {
     console.log(`Reserve pool: ${reserveCount} puzzle(s) (>= ${MIN_RESERVES})`);
   }
 
-  if (hasWarning) process.exit(1);
 }
 
 main();

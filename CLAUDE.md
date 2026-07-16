@@ -28,8 +28,7 @@ a dependency, plan upgrade, or paid service without flagging it explicitly.
   Use `@supabase/ssr` for session handling in Next.js.
 - **Puzzle generation:** GitHub Models (free inference via PAT) — build-time drafting
   tool ONLY, never a runtime dependency. See "Puzzle content" below.
-- **Domain:** `<name>.is-a.software` (free subdomain, CNAME → `cname.vercel-dns.com`).
-  The domain lives in exactly ONE env var. Never hardcode it in components or share text.
+- **Domain:** TBD. The domain lives in exactly ONE env var (`SITE_DOMAIN`). Never hardcode it in components or share text.
 
 ## Repo visibility
 

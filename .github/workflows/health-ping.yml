@@ -8,6 +8,7 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    if: vars.SITE_DOMAIN != ''
     steps:
       - name: Ping health endpoint
         run: curl -fsS "https://${{ vars.SITE_DOMAIN }}/api/health"
