@@ -1,12 +1,26 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import { createClient } from "@supabase/supabase-js";
-import { chatComplete, MODEL } from "./lib/model-provider";
+import { chatText, MODEL } from "./lib/model-provider";
 import { parseJsonResponse } from "./lib/json";
 import { calibrate } from "./lib/calibration";
 import { puzzleSchema, type Puzzle } from "../src/lib/puzzle-schema";
+import { normalizeGuess } from "../src/lib/guess";
 
 const MAX_REGENERATION_ATTEMPTS = 3;
 const EXCLUSION_WINDOW_DAYS = 90;
 const BUFFER_OFFSET_DAYS = 14;
+
+// The autocomplete vocabulary (public/vocab/services.json) is the actual
+// list of services players can search/select — it's also the real,
+// up-to-date candidate pool for puzzle answers. Without this, the
+// drafting model only ever proposes services it already "knows" well
+// enough to think of unprompted, so newly-added entries (e.g. Microsoft
+// Foundry) never surface as answers even though players can guess them.
+function loadServiceVocab(): string[] {
+  const path = join(__dirname, "..", "public", "vocab", "services.json");
+  return JSON.parse(readFileSync(path, "utf-8"));
+}
 
 const CLUE_LADDER_SPEC = `
 Every puzzle has exactly 5 clues following this ladder, each roughly halving the
@@ -134,10 +148,10 @@ async function nextPuzzleNumber(supabase: ReturnType<typeof getAdminClient>): Pr
 }
 
 async function draftPuzzle(
-  excludedAnswers: string[],
+  eligibleAnswers: string[],
   slot: { date: string; number: number } | { status: "reserve" },
 ): Promise<Puzzle> {
-  const content = await chatComplete(
+  const content = await chatText(
     MODEL,
     [
       {
@@ -149,7 +163,10 @@ async function draftPuzzle(
       },
       {
         role: "user",
-        content: `${CLUE_LADDER_SPEC}\n\nDo not use any of these answers (used in the last ${EXCLUSION_WINDOW_DAYS} days): ${excludedAnswers.join(", ") || "(none)"}`,
+        content:
+          `${CLUE_LADDER_SPEC}\n\nThe "answer" MUST be exactly one of the services in this list — copy the ` +
+          "spelling exactly, do not invent a service or use a different name/abbreviation for the answer " +
+          `field (aliases are still fine for alternate names players might type):\n${eligibleAnswers.join(", ")}`,
       },
     ],
     { json: true },
@@ -169,6 +186,17 @@ async function draftPuzzle(
 async function generateOne(mode: "queued" | "reserve") {
   const supabase = getAdminClient();
   const excludedAnswers = await recentAnswers(supabase);
+  const excludedSet = new Set(excludedAnswers.map(normalizeGuess));
+
+  const vocab = loadServiceVocab();
+  const eligibleAnswers = vocab.filter((service) => !excludedSet.has(normalizeGuess(service)));
+  if (eligibleAnswers.length === 0) {
+    // Every service in the vocab was used in the last 90 days (or is
+    // already a reserve puzzle) — should be unreachable at ~70 services
+    // and 1 puzzle/day, but fail loudly rather than draft from an empty
+    // candidate list.
+    throw new Error("No eligible answers left — every vocab service is within the exclusion window");
+  }
 
   const slot =
     mode === "reserve"
@@ -178,12 +206,20 @@ async function generateOne(mode: "queued" | "reserve") {
 
   for (let attempt = 1; attempt <= MAX_REGENERATION_ATTEMPTS; attempt++) {
     console.log(`Generating ${label} (attempt ${attempt}/${MAX_REGENERATION_ATTEMPTS})`);
-    const puzzle = await draftPuzzle(excludedAnswers, slot);
+    const puzzle = await draftPuzzle(eligibleAnswers, slot);
 
-    if (excludedAnswers.some((a) => a.toLowerCase() === puzzle.answer.toLowerCase())) {
-      console.log("Duplicate answer within exclusion window, regenerating");
+    const normalizedAnswer = normalizeGuess(puzzle.answer);
+    const matchedVocabEntry = eligibleAnswers.find(
+      (service) => normalizeGuess(service) === normalizedAnswer,
+    );
+    if (!matchedVocabEntry) {
+      console.log(`Answer "${puzzle.answer}" is not in the eligible vocab list, regenerating`);
       continue;
     }
+    // Snap to the vocab's exact spelling even on a near-match (different
+    // casing/whitespace) — keeps the stored answer consistent with what
+    // autocomplete actually offers players.
+    puzzle.answer = matchedVocabEntry;
 
     const result = await calibrate(puzzle);
     if (!result.passed) continue;

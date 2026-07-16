@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -34,6 +34,7 @@ jobs:
       - name: Generate puzzle for today+14
         env:
           GITHUB_MODELS_TOKEN: ${{ secrets.MODELS_PAT }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run generate:puzzle
@@ -59,6 +60,7 @@ jobs:
         if: steps.reserve.outputs.count < 5
         env:
           GITHUB_MODELS_TOKEN: ${{ secrets.MODELS_PAT }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run generate:reserve
@@ -72,7 +74,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci

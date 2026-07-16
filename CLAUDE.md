@@ -155,8 +155,19 @@ provider credentials already live in Actions secrets).
 by the daily Actions cron. `scripts/lib/model-provider.ts` reads `MODEL_PROVIDER`
 (unset or anything other than `"ollama"` → GitHub Models; `"ollama"` → Ollama Cloud)
 and routes every call through the matching client (`github-models.ts` or
-`ollama-cloud.ts`), each exposing the same `chatComplete(model, messages, options)`
-signature.
+`ollama-cloud.ts`), each exposing an internal `chatComplete` with the same
+`ChatMessage[]` / `ChatOptions` / `ChatResult` shapes (`scripts/lib/chat-types.ts`).
+Callers use one of two public entry points instead of the raw `chatComplete`:
+- `chatText(model, messages, options)` — plain text, throws if the model
+  unexpectedly tries to call a tool.
+- `runWithTools(model, messages, tools, toolImpls, options)` — a bounded loop
+  (`MAX_TOOL_ROUNDS`, currently 3) that executes local tool implementations and
+  feeds results back until the model returns final text.
+
+Each provider client normalizes its own wire-format quirks for tool calls before
+returning — GitHub Models' OpenAI-compatible format sends `function.arguments` as a
+JSON *string*; Ollama Cloud sends it pre-parsed as an object. Callers of
+`chatText`/`runWithTools` never see this difference.
 
 **Ollama Cloud is a local-only dev/testing convenience, never used in the production
 cron.** Set `MODEL_PROVIDER=ollama` locally when iterating on the generation pipeline
@@ -186,7 +197,15 @@ inserted:
 2. **Fact/structure check:** feed the full answer + clues to a model and ask it to
    verify the same things a human reviewer used to check — facts correct and current,
    clue 5 identifies exactly one service, and clues strictly increase in specificity
-   with no earlier clue giving it away. Any failure → regenerate.
+   with no earlier clue giving it away. Any failure → regenerate. This step has a
+   **web search tool available** (`search_web`, backed by Tavily —
+   `scripts/lib/tavily.ts`, `TAVILY_API_KEY`, free tier 1,000 credits/month) via
+   `runWithTools()`. The model decides when to search (the tool's description tells
+   it to reach for search when uncertain, especially for newer/less-common Azure
+   services) — it's not forced on every call. This exists because the drafting
+   model's training data can be stale or thin for services it doesn't know well,
+   which matters more now that answers are constrained to the full `services.json`
+   vocab (see below) rather than only what the model already knows confidently.
 
 **A third check — clue-1 solo-guess difficulty — was tried and removed.** It sampled 5
 guesses from clue 1 alone and rejected the puzzle if an LLM landed the answer 4+ of 5
@@ -209,15 +228,31 @@ buffer absorbs it).
 Daily workflow (`.github/workflows/generate-puzzle.yml`):
 
 1. `scripts/generate-puzzles.ts` calls the active provider with a prompt embedding the
-   full clue-ladder spec, the JSON schema, AND the list of answers used in the last 90
-   days (to exclude — with ~200 featurable services, duplicate pressure is real).
+   full clue-ladder spec, the JSON schema, and the **eligible answer list**: every
+   service in `public/vocab/services.json` MINUS any used in the last 90 days or
+   already sitting as a `reserve` puzzle. The model MUST pick its answer from this
+   list (not free-associate a service name) — see "Answers come from the vocab list"
+   below for why.
 2. Structural validation: schema check (exactly 5 clues, valid category/difficulty,
-   non-empty aliases), no duplicate answer within the 90-day window.
+   non-empty aliases), and the answer is re-checked against the eligible list
+   (case/prefix-insensitive via `normalizeGuess`) — if the model ignored the
+   constraint and invented or misspelled an answer, discard and redraft.
 3. `calibrate()` (the two checks above) — any failure discards the puzzle and
    redrafts from scratch.
 4. On success: **insert the row directly into Supabase** with `status = 'queued'` and
    a real `date`/`number` already assigned (today+14, next sequential number). It's
    immediately servable once its date arrives — no further gate.
+
+**Answers come from the vocab list, not the model's free association.** Without this
+constraint, the drafting model only ever proposes services it already "knows" well
+enough to think of unprompted — a newly-added `services.json` entry (e.g. Microsoft
+Foundry) could sit in the autocomplete list forever without ever being chosen as an
+actual answer, even though players could search for and guess it. `draftPuzzle()`'s
+prompt states the eligible list explicitly and instructs the model to copy the exact
+spelling; `generateOne()` re-validates the returned answer against that same list
+(normalized) before accepting it, and snaps to the vocab's exact spelling on a
+near-match (different casing/whitespace) so the stored answer stays consistent with
+what autocomplete offers.
 
 **Reserve pool fallback:** keep ~10 evergreen puzzles with `status = 'reserve'`. If
 `GET /api/puzzle/today` finds no queued/live puzzle for the current UTC date (empty
@@ -232,11 +267,13 @@ General rules:
   app runtime — free tiers are rate-limited and it would add latency and a hard
   dependency. Back off and retry on 429s inside the client (both providers implement
   this the same way).
-- Provider credentials (`GITHUB_MODELS_TOKEN`, `OLLAMA_API_KEY`) live in local env vars
-  only, never committed. In GitHub Actions, the PAT is stored under the secret name
-  `MODELS_PAT` (Actions rejects secret names starting with `GITHUB_` — reserved for
-  GitHub's own auto-populated vars) and mapped onto the `GITHUB_MODELS_TOKEN` env var
-  name inside the workflow, which is what the code actually reads.
+- Provider credentials (`GITHUB_MODELS_TOKEN`, `OLLAMA_API_KEY`, `TAVILY_API_KEY`) live
+  in local env vars only, never committed. In GitHub Actions, the PAT is stored under
+  the secret name `MODELS_PAT` (Actions rejects secret names starting with `GITHUB_` —
+  reserved for GitHub's own auto-populated vars) and mapped onto the
+  `GITHUB_MODELS_TOKEN` env var name inside the workflow, which is what the code
+  actually reads. `TAVILY_API_KEY` needs no such renaming — add it as-is to Actions
+  secrets.
 - Generated output goes straight into Supabase as `queued` — NEVER into a
   git-committed file. There is no human approval step; `calibrate()` is the only gate,
   so if you touch that function or its threshold, you're changing what the ENTIRE

@@ -1,5 +1,7 @@
-import { chatComplete, MODEL } from "./model-provider";
+import { chatText, runWithTools, MODEL } from "./model-provider";
+import { tavilySearch } from "./tavily";
 import { parseJsonResponse } from "./json";
+import type { ToolDefinition } from "./chat-types";
 import type { Puzzle } from "../../src/lib/puzzle-schema";
 
 export type CalibrationResult =
@@ -25,7 +27,7 @@ export type CalibrationResult =
  * clues, not catching bad ones. See CLAUDE.md for the fuller rationale.
  */
 export async function calibrate(puzzle: Puzzle): Promise<CalibrationResult> {
-  const shortlistReply = await chatComplete(MODEL, [
+  const shortlistReply = await chatText(MODEL, [
     {
       role: "system",
       content:
@@ -57,23 +59,47 @@ type FactCheckResult = {
   issues: string[];
 };
 
+const SEARCH_TOOL: ToolDefinition = {
+  name: "search_web",
+  description:
+    "Search the web for current, factual information about an Azure service — its name, " +
+    "abbreviation, AWS equivalent, or a specific feature claim. Use this whenever you are not " +
+    "fully certain a claim is accurate or current, especially for newer or less-common Azure " +
+    "services you may not have complete or up-to-date knowledge of.",
+  parameters: {
+    type: "object",
+    required: ["query"],
+    properties: {
+      query: { type: "string", description: "The search query, e.g. \"Azure Container Apps AWS equivalent\"" },
+    },
+  },
+};
+
 /**
  * Replaces the human review checklist from CLAUDE.md with a model-graded
  * pass over the same criteria: facts correct and current (service name,
  * abbreviation, AWS equivalent), clue 5 identifies exactly one service, and
  * clues strictly increase in specificity (no early clue giving it away).
+ *
+ * Has web search available (Tavily) — the model's own knowledge can be
+ * stale or incomplete for newer/less-common services (see CLAUDE.md on
+ * why answers now come from the full services.json vocab, not just what
+ * the model already knows well). It's offered as a tool, not forced on
+ * every call — the model decides when it's actually uncertain enough to
+ * need it, per the tool's own description.
  */
 async function passesFactCheck(
   puzzle: Puzzle,
 ): Promise<{ passed: true } | { passed: false; reason: "fact_check"; issues: string[] }> {
-  const reply = await chatComplete(
+  const reply = await runWithTools(
     MODEL,
     [
       {
         role: "system",
         content:
-          "You are a meticulous fact-checker for an Azure trivia game. Verify the puzzle below and " +
-          "respond with ONLY a JSON object: " +
+          "You are a meticulous fact-checker for an Azure trivia game. You have a search_web tool — use it " +
+          "when you're not fully certain a claim is accurate or current, especially for services you may not " +
+          "know well. Verify the puzzle below and respond with ONLY a JSON object: " +
           '{"factsCorrect": boolean, "clue5Unique": boolean, "ladderAscending": boolean, "issues": string[]}. ' +
           "factsCorrect: is every factual claim actually made in the clues (which may include an AWS " +
           "equivalent, an abbreviation, or another specific claim — not all three are required, and some " +
@@ -85,7 +111,8 @@ async function passesFactCheck(
           "found. MANDATORY: if factsCorrect, clue5Unique, or ladderAscending is false, issues MUST contain " +
           "at least one specific, concrete explanation naming which clue and what is wrong with it — never " +
           "return false for any field with an empty issues array. Only return an empty issues array when " +
-          "all three fields are true.",
+          "all three fields are true. Once you've verified (searching if needed), respond with ONLY the JSON " +
+          "object — no other text.",
       },
       {
         role: "user",
@@ -96,6 +123,8 @@ async function passesFactCheck(
         }),
       },
     ],
+    [SEARCH_TOOL],
+    { search_web: async (args) => tavilySearch(String(args.query)) },
     { json: true },
   );
 
