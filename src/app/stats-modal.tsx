@@ -22,6 +22,7 @@ type StatsData = {
   leaderboard: LeaderboardEntry[];
   myCluesRevealed: number | null;
   mySolved: boolean | null;
+  myElapsedSeconds: number | null;
   todayElapsedSeconds?: number;
 };
 
@@ -82,9 +83,12 @@ export default function StatsModal({ open, onClose }: Props) {
           }
         }
 
-        // Today's elapsed time from localStorage
+        // Today's elapsed time — prefer localStorage (most accurate for this
+        // device), fall back to server value (covers cross-device completions).
         const local = getLocalProgress(todayDate());
-        data.todayElapsedSeconds = local?.gameOver ? local.elapsedSeconds : undefined;
+        data.todayElapsedSeconds =
+          (local?.gameOver ? local.elapsedSeconds : undefined) ??
+          (data.myElapsedSeconds ?? undefined);
 
         setState({ status: "ok", data });
       })

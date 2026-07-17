@@ -98,22 +98,24 @@ export async function GET() {
     solveDistribution[row.clues_revealed] = (solveDistribution[row.clues_revealed] ?? 0) + 1;
   }
 
-  // Current user's result for highlighting
+  // Current user's result for highlighting + time stat
   let myCluesRevealed: number | null = null;
   let mySolved: boolean | null = null;
+  let myElapsedSeconds: number | null = null;
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data: mine } = await admin
         .from("attempts")
-        .select("solved, clues_revealed")
+        .select("solved, clues_revealed, elapsed_seconds")
         .eq("user_id", user.id)
         .eq("puzzle_date", today)
         .maybeSingle();
       if (mine) {
         myCluesRevealed = mine.clues_revealed;
         mySolved = mine.solved;
+        myElapsedSeconds = mine.elapsed_seconds ?? null;
       }
     }
   } catch {
@@ -129,5 +131,6 @@ export async function GET() {
     leaderboard,
     myCluesRevealed,
     mySolved,
+    myElapsedSeconds,
   });
 }
