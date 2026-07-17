@@ -60,9 +60,12 @@ export default function AuthModal({ open, onClose }: Props) {
 
   async function signInWithOAuth(provider: "github" | "google") {
     const supabase = createClient();
+    // Use the stable site URL in production so deployment-specific Vercel
+    // URLs (which expire) never end up as the OAuth redirect target.
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${origin}/auth/callback` },
     });
   }
 
@@ -77,10 +80,11 @@ export default function AuthModal({ open, onClose }: Props) {
         if (error) { setError(error.message); return; }
         onClose();
       } else {
+        const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          options: { emailRedirectTo: `${origin}/auth/callback` },
         });
         if (error) { setError(error.message); return; }
         setEmailSent(true);
