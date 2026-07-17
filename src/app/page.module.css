@@ -3,116 +3,170 @@
   flex: 1;
   min-height: 100vh;
   flex-direction: column;
-  align-items: center;
-  background-color: var(--surface);
-  background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-color: #fafafa;
+  background-image: radial-gradient(circle, rgb(0 95 170 / 0.16) 1px, transparent 1px);
+  background-size: 35px 35px;
+  border: 4px solid #6960f7;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .topbar {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 26px;
   width: 100%;
-  height: 48px;
-  padding: 0 var(--space-lg);
-  background: var(--topbar);
-  color: #fff;
+  min-height: 72px;
+  padding: 0 clamp(24px, 5.8vw, 80px);
+  border-bottom: 1px solid #c9d3e3;
+  background: #ffffff;
+  color: var(--ink);
+}
+
+.topbarBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .topbarIcon {
   height: auto;
   width: 22px;
-  filter: brightness(0) invert(1);
 }
 
 .topbarTitle {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  color: var(--primary);
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.topbarDivider {
+  width: 1px;
+  height: 18px;
+  margin-left: -6px;
+  background: #c9d3e3;
 }
 
 .topbarBadge {
+  padding: 5px 10px;
+  border-radius: 2px;
+  background: #eff1f4;
+  color: #3d424c;
+  font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .topbarRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
   margin-left: auto;
 }
 
 .main {
+  width: min(1244px, calc(100% - 48px));
+  margin: 52px auto 96px;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  align-items: center;
+  gap: 32px;
+  margin-top: auto;
+  padding: 46px clamp(24px, 5.8vw, 80px);
+  border-top: 1px solid #e7ebf2;
+  background: #ffffff;
+  color: #6f7785;
+  font-size: 14px;
+}
+
+.footerBrand {
   display: flex;
-  width: 100%;
-  max-width: 800px;
   flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-md);
-  margin: var(--space-lg) var(--space-md);
-  padding: var(--space-lg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background-color: var(--bg);
-  box-shadow: var(--shadow-card);
-  max-height: calc(100dvh - 48px - 2 * var(--space-lg));
-  overflow: hidden;
+  gap: 10px;
 }
 
-/* Compact single-row header — wordmark left, nav+help right */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-shrink: 0;
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--border);
-}
-
-.wordmark {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.wordmarkIcon {
-  height: auto;
-  width: 24px;
-}
-
-.wordmarkTitle {
-  font-size: 16px;
+.footerTitle {
+  color: var(--primary);
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--ink);
+  letter-spacing: -0.02em;
 }
 
-.wordmarkSub {
-  font-size: 13px;
-  color: var(--muted);
-  margin-left: var(--space-xs);
-}
-
-.headerRight {
+.footerLinks {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  justify-content: center;
+  gap: 42px;
+  color: #3d424c;
+  font-weight: 600;
 }
 
-@media (max-width: 600px) {
-  .main {
-    margin: var(--space-sm) var(--space-xs);
-    padding: var(--space-md);
-    max-height: calc(100dvh - 48px - 2 * var(--space-sm));
+.footerLinks a:hover {
+  color: var(--primary);
+}
+
+.copyright {
+  justify-self: end;
+  color: #8b929f;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .page {
+    border-width: 3px;
   }
 
-  .wordmarkSub {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding: 16px 20px;
+  }
+
+  .topbarRight {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .main {
+    width: min(100% - 28px, 720px);
+    margin: 32px auto 64px;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+    align-items: start;
+    padding: 34px 20px;
+  }
+
+  .footerLinks {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 18px 28px;
+  }
+
+  .copyright {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbarDivider,
+  .topbarBadge {
     display: none;
+  }
+
+  .topbarRight {
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
 }

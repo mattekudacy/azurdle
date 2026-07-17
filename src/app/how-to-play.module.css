@@ -2,29 +2,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0;
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   background: transparent;
-  color: var(--muted);
+  color: #3d424c;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
   transition: background-color 150ms ease-out, color 150ms ease-out;
 }
 
 .trigger:hover {
-  background: var(--surface);
-  color: var(--ink);
+  background: transparent;
+  color: var(--primary);
 }
 
 .trigger:focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 .dialog {
   width: min(480px, calc(100vw - var(--space-lg)));
   max-height: min(640px, calc(100vh - var(--space-xl)));
+  margin: auto;
   overflow-y: auto;
   padding: var(--space-lg);
   border: 1px solid var(--border);

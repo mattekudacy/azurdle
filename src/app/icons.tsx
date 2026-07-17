@@ -75,3 +75,14 @@ export function HelpIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function ShareIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" className={className} aria-hidden="true">
+      <circle cx="5" cy="10" r="2" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="14.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="14.5" cy="14.5" r="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6.8 9.1l5.9-2.8M6.8 10.9l5.9 2.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}

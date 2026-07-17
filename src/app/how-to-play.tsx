@@ -39,6 +39,7 @@ export default function HowToPlay() {
         onClick={() => dialogRef.current?.showModal()}
       >
         <HelpIcon />
+        <span>Help</span>
       </button>
       <dialog ref={dialogRef} className={styles.dialog} aria-labelledby="how-to-play-title">
         <div className={styles.header}>

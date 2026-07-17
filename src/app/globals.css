@@ -11,13 +11,13 @@
   --accent-wash: #107c10;
   --accent-ink: #ffffff;
   /* Attribute grid: green = exact, yellow = close (year direction), red = no match */
-  --attr-hit: #107c10;
+  --attr-hit: #168914;
   --attr-hit-ink: #ffffff;
-  --attr-close: #ffb900;
-  --attr-close-ink: #424f44;
-  --attr-miss: #d83b01;
-  --attr-miss-ink: #ffffff;
-  --border: #e1e1e1;
+  --attr-close: #edf1f6;
+  --attr-close-ink: #424b57;
+  --attr-miss: #fff0f0;
+  --attr-miss-ink: #d31e25;
+  --border: #cbd5e4;
   --grid-dot: #0078d4 / 0.06;
   --topbar: #0078d4;
 

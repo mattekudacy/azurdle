@@ -5,7 +5,7 @@ import styles from "./game-board.module.css";
 import AutocompleteInput from "./autocomplete-input";
 import NextPuzzleCountdown from "./next-puzzle-countdown";
 import ResultSquares from "./result-squares";
-import { CloseIcon, HistoryIcon } from "./icons";
+import { CloseIcon, HistoryIcon, ShareIcon } from "./icons";
 import { getLocalProgress, saveLocalProgress, type LocalProgress } from "@/lib/local-progress";
 import { normalizeGuess } from "@/lib/guess";
 import type { AttributeComparison } from "@/lib/attribute-comparison";
@@ -133,10 +133,7 @@ export default function GameBoard() {
   // Sync elapsed time from progress on load, then tick while in play
   useEffect(() => {
     if (!progress) return;
-    if (progress.gameOver) {
-      setElapsed(progress.elapsedSeconds ?? 0);
-      return;
-    }
+    if (progress.gameOver) return;
     if (!progress.startedAt) return; // no guesses yet — timer hasn't started
 
     const tick = () => {
@@ -227,8 +224,6 @@ export default function GameBoard() {
         ? progress.clues.length + 1
         : progress.clues.length;
 
-      const elapsedSeconds = data.gameOver ? currentElapsed : undefined;
-
       const updated: LocalProgress = {
         ...progress,
         guesses: [...progress.guesses, { name: guess, comparison: data.attributeComparison }],
@@ -305,16 +300,21 @@ export default function GameBoard() {
 
   const guessesLeft = MAX_GUESSES - progress.guesses.length;
   const revealedDuringPlay = progress.revealedDuringPlay ?? progress.clues.length;
+  const displayedElapsed = progress.gameOver ? (progress.elapsedSeconds ?? elapsed) : elapsed;
 
   return (
     <div className={styles.board}>
-      <p className={styles.meta}>
-        Azurdle #{puzzle.number}
-        {progress.gameOver && ` · ${puzzle.category}`}
+      <div className={styles.boardHeader}>
+        <h1 className={styles.title}>
+          Azurdle #{puzzle.number} <span>{puzzle.category}</span>
+        </h1>
         {(progress.startedAt || progress.gameOver) && (
-          <span className={styles.timer}>{formatTime(elapsed)}</span>
+          <p className={styles.session}>
+            <span>Session:</span>
+            <span className={styles.timer}>{formatTime(displayedElapsed)}</span>
+          </p>
         )}
-      </p>
+      </div>
 
       <div className={styles.columns}>
         <div className={styles.leftCol}>
@@ -334,7 +334,7 @@ export default function GameBoard() {
                     <span className={`${styles.clueNumber} ${isBonusContext ? styles.clueNumberBonus : ""}`}>
                       {i + 1}
                     </span>
-                    {clue}
+                    <span className={styles.clueText}>{clue}</span>
                   </li>
                 );
               })}
@@ -379,7 +379,6 @@ export default function GameBoard() {
               </form>
             ) : (
               <>
-                <ResultSquares revealedDuringPlay={revealedDuringPlay} solved={progress.solved} />
                 <p
                   role="status"
                   aria-live="polite"
@@ -391,17 +390,25 @@ export default function GameBoard() {
                     ? `Solved on clue ${revealedDuringPlay}! The answer was ${progress.answer}.`
                     : `Out of guesses. The answer was ${progress.answer}.`}
                 </p>
+              </>
+            )}
+
+            {progress.gameOver && (
+              <div className={styles.afterGamePanel}>
+                <div>
+                  <ResultSquares revealedDuringPlay={revealedDuringPlay} solved={progress.solved} />
+                  <NextPuzzleCountdown />
+                </div>
                 <button
                   type="button"
                   onClick={handleShare}
                   className={`${styles.shareButton} ${copied ? styles.shareButtonCopied : ""}`}
                 >
-                  {copied ? "Copied!" : "Share"}
+                  <ShareIcon />
+                  {copied ? "Copied!" : "Share Results"}
                 </button>
-              </>
+              </div>
             )}
-
-            {progress.gameOver && <NextPuzzleCountdown />}
 
             {!progress.gameOver && (
               <p role="status" aria-live="polite" className={styles.statusMessage}>
@@ -412,17 +419,22 @@ export default function GameBoard() {
         </div>
 
         <div className={styles.rightCol}>
-          {progress.guesses.length > 0 || progress.gameOver ? (
-            <section className={styles.cloudLog}>
-              <div className={styles.cloudLogLabel}>
-                <HistoryIcon />
-                <span>Cloud Log</span>
-                {!progress.gameOver && <span className={styles.liveFeed}>LIVE FEED</span>}
-              </div>
+          <section className={styles.cloudLog}>
+            <div className={styles.cloudLogLabel}>
+              <HistoryIcon />
+              <span>Cloud Log</span>
+              {!progress.gameOver && <span className={styles.liveFeed}>LIVE FEED</span>}
+            </div>
+            {progress.guesses.length > 0 || progress.gameOver ? (
               <ul className={styles.guessList}>
                 {progress.guesses.map((g, i) =>
                   g.comparison ? (
-                    <li key={i} className={styles.guessItemWithGrid}>
+                    <li
+                      key={i}
+                      className={`${styles.guessItemWithGrid} ${
+                        progress.solved && i === progress.guesses.length - 1 ? styles.guessItemCorrect : ""
+                      }`}
+                    >
                       <div className={styles.guessItemPill}>
                         {!(progress.solved && i === progress.guesses.length - 1) && (
                           <CloseIcon className={styles.guessItemIcon} />
@@ -441,10 +453,10 @@ export default function GameBoard() {
                   ),
                 )}
               </ul>
-            </section>
-          ) : (
-            <p className={styles.logEmpty}>Your guesses will appear here.</p>
-          )}
+            ) : (
+              <p className={styles.logEmpty}>Your guesses will appear here.</p>
+            )}
+          </section>
         </div>
       </div>
     </div>
