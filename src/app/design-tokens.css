@@ -1,0 +1,140 @@
+/**
+ * Design Tokens — Cloud-Native Gaming System
+ * Applied from Stitch project: Azure Service Quest (projects/11529030756862062214)
+ *
+ * This design system fuses Corporate Modern with Playful Gamification,
+ * leveraging Azure's trusted architectural foundations while injecting
+ * discovery and delight essential for a daily guessing game.
+ */
+
+/* Color Palette — Core Identity */
+:root {
+  /* Primary Actions & Brand */
+  --color-primary-deep: #005faa;        /* Navy depth */
+  --color-primary: #0078d4;             /* Azure Blue — brand anchor */
+  --color-primary-light: #a3c9ff;       /* Light variant for backgrounds */
+
+  /* Secondary & Tertiary */
+  --color-secondary: #465e90;           /* Navy — typography grounding */
+  --color-tertiary: #107c10;            /* Green — success/correct state */
+  --color-tertiary-light: #79dd68;      /* Light green for accents */
+
+  /* Error & Warning States */
+  --color-error: #ba1a1a;               /* Red — incorrect state */
+  --color-warning: #ffb900;             /* Gold — partial/close matches */
+
+  /* Neutral Surface Scale */
+  --color-surface-lowest: #ffffff;      /* Pure white — card base */
+  --color-surface-low: #f3f3f3;         /* Light fill */
+  --color-surface: #f9f9f9;             /* Default background */
+  --color-surface-dim: #dadada;         /* Subtle grays */
+  --color-surface-variant: #e2e2e2;     /* Border neutral */
+
+  /* Text & Semantics */
+  --color-on-surface: #1a1c1c;          /* Body text — high contrast */
+  --color-on-surface-variant: #404752;  /* Muted/secondary text */
+}
+
+/* Typography Scale — Hanken Grotesk + JetBrains Mono */
+:root {
+  /* Display & Headline Level */
+  --type-display-lg: 40px / 1.2 / 700;  /* "Azurdle #47" — game title */
+  --type-headline-md: 24px / 1.33 / 600; /* Category, section headers */
+  --type-body-base: 16px / 1.5 / 400;   /* Clue text, main content */
+
+  /* Label & Technical */
+  --type-label-mono: 13px / 1.23 / 500;  /* Cloud Log timestamps, tags */
+  --type-stat-mono: 32px / 1.25 / 700;   /* Large numbers (timer, counter) */
+}
+
+/* Shape System — Soft Roundedness (4px) */
+:root {
+  --shape-corner-sm: 2px;               /* Tags, minor elements */
+  --shape-corner-md: 4px;               /* Cards, buttons, inputs */
+  --shape-corner-lg: 4px;               /* Container radius */
+  --shape-corner-pill: 999px;           /* Fully rounded edges */
+}
+
+/* Spacing Scale — Rhythmic Intervals */
+:root {
+  --spacing-xs: 4px;                    /* 1 unit */
+  --spacing-sm: 8px;                    /* 2 units */
+  --spacing-md: 16px;                   /* 4 units — gutter */
+  --spacing-lg: 24px;                   /* 6 units — page margin */
+  --spacing-xl: 40px;                   /* 10 units — container max */
+}
+
+/* Depth & Shadows — Low-Contrast Outlines */
+:root {
+  --shadow-card: 0 1.6px 3.6px rgb(0 0 0 / 0.08),
+                 0 0.3px 0.9px rgb(0 0 0 / 0.06);
+  --shadow-elevation-1: 0 1px 2px rgb(0 0 0 / 0.12);
+  --shadow-elevation-2: 0 4px 8px rgb(0 0 0 / 0.16);
+}
+
+/* Component-Specific Overrides */
+
+/* Clue Cards — White surface with 1px border */
+.clue {
+  background: var(--color-surface-lowest);
+  border-color: var(--color-surface-variant);
+}
+
+/* Cloud Log — Subtle tint distinguishes the panel */
+.cloudLog {
+  background: var(--color-surface);
+}
+
+/* Attribute Grid Tags */
+.attributeGridMatch {
+  background: var(--color-tertiary);
+  color: white;
+}
+
+.attributeGridClose {
+  background: var(--color-warning);
+  color: var(--color-on-surface);
+}
+
+.attributeGridMiss {
+  background: var(--color-error);
+  color: white;
+}
+
+/* Button States */
+.button {
+  background: var(--color-primary);
+  color: white;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-primary-deep);
+}
+
+/* Result Banner — Green wash for success */
+.resultBannerWin {
+  background: var(--color-tertiary);
+  color: white;
+}
+
+/* Design Philosophy Notes
+
+The design follows these principles from the Cloud-Native Gaming System:
+
+1. **Minimalist Foundation with Tactile Accents** — Clean whitespace with
+   subtle depth through tonal layering and sharp, purposeful borders
+   mimicking cloud service modularity.
+
+2. **Data-Driven Aesthetic** — JetBrains Mono for technical metadata
+   (category, year, pricing) reinforces the developer-centric theme.
+
+3. **State Feedback Without Red/Amber** — Misses are information, not
+   errors. Blue border pulse on reveal animation, no red flashing.
+
+4. **Two-Column Layout (Desktop)** — Clue stack left (55%), Cloud Log
+   right (45%), stacking vertically on mobile <680px.
+
+5. **Elevation via Outlines, Not Shadows** — 1px borders and tonal fills
+   maintain the flat-plus Azure aesthetic rather than heavy drop shadows.
+
+*/

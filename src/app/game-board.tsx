@@ -417,6 +417,7 @@ export default function GameBoard() {
               <div className={styles.cloudLogLabel}>
                 <HistoryIcon />
                 <span>Cloud Log</span>
+                {!progress.gameOver && <span className={styles.liveFeed}>LIVE FEED</span>}
               </div>
               <ul className={styles.guessList}>
                 {progress.guesses.map((g, i) =>

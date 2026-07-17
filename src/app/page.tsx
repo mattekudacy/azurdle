@@ -18,6 +18,7 @@ export default function Home() {
           className={styles.topbarIcon}
         />
         <span className={styles.topbarTitle}>Azurdle</span>
+        <span className={styles.topbarBadge}>Cloudshell: Live</span>
       </div>
       <main className={styles.main}>
         <div className={styles.header}>

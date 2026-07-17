@@ -278,6 +278,67 @@ General rules:
   so if you touch that function or its threshold, you're changing what the ENTIRE
   review process catches.
 
+## Design System
+
+### Layout & Structure
+
+The game interface uses a **two-column layout** for optimal gameplay experience:
+
+**Header Section:**
+- Topbar (48px fixed height): Azurdle logo + brand name on left; Archive, Stats, Help buttons in center; Sign out on right
+- Main header in content area: Title "Azurdle #X ServiceName" with category subtitle
+- Session timer (HH:MM:SS format) displayed right-aligned in title row
+
+**Game Area (two-column):**
+- **Left column (55%):** Clue list + guess input bar
+  - Scrollable clue list with numbered pills (1-5) in primary blue badges
+  - Clues fade in as guesses reveal them (staggered ladder effect)
+  - Dashed pipeline connectors between clues (visual dependency chain)
+  - Input bar at bottom: autocomplete input + submit button (always visible, pinned)
+  - Shake animation on wrong guesses (horizontal jitter, not red flash — misses are information)
+  
+- **Right column (45%):** Cloud Log (guesses history)
+  - "Cloud Log" header with history icon + "LIVE FEED" badge
+  - Scrollable list of guesses with badges/metadata
+  - Each guess shows:
+    - Service name in pill (red X icon for wrong guesses, no icon for correct)
+    - Attribute grid below showing: category badge, launch year, model type (PaaS/IaaS/SaaS), pricing tier
+  - Animates in as guesses are submitted (same reveal animation as clues)
+
+**Result Section (game over only):**
+- Result banner (green for win, subtle for loss) with result text
+- Success message: "Solved on clue N! The answer was X."
+- Failure message: "Out of guesses. The answer was X."
+- Share button (copy to clipboard) below results
+- Countdown timer to next puzzle
+
+### Colors & Styling
+
+- **Primary:** Microsoft Azure Blue for interactive elements (button, badges, focus states)
+- **Accents:** Green wash background for win state, muted grays for neutral states
+- **Icons:** X for wrong guesses (muted color), checkmark appearance for correct
+- **Badges:** Category tags (COMPUTE, STORAGE, etc.), year badges, model type tags
+- **Animations:**
+  - Clue reveal: fade + slide up (260ms)
+  - Miss highlight: border pulse on newly-revealed clue (900ms)
+  - Input shake: horizontal jitter on wrong guess (320ms)
+  - Result banner: reveal from bottom (220ms)
+
+### Typography & Spacing
+
+- Title: Geist Sans, 16px bold (puzzle #X and category)
+- Monospace: Geist Mono for clue numbers, timer, guesses list (code-like precision)
+- Standard body: Geist Sans, 15px for clue text
+- Metadata/labels: 11-13px uppercase with letter spacing for Cloud Log headers
+- Spacing: 12px gaps (var(--space-sm)), 16px paragraph spacing (var(--space-md))
+
+### Responsive Design
+
+- **Desktop (>680px):** Two-column layout with right panel at 45% width
+- **Mobile (<680px):** Stacked vertical layout, right panel becomes row 2
+- Topbar always visible at top
+- Game area scrolls internally (pinned guess input on desktop, adapts on mobile)
+
 ## Frontend conventions
 
 - Keep the bundle small. Game state machine: clue reveal → guess → result → share.
@@ -288,6 +349,12 @@ General rules:
   per puzzle date. Never store anything answer-adjacent. Shape must map cleanly onto the
   `attempts` row for `/api/migrate`.
 - Accessible by default: fully playable by keyboard; clue reveals announced via aria-live.
+- **Cloud Log:** Displays the history of player guesses with service metadata (category, year, model type, pricing).
+  - Wrong guesses show red X icon and remain visible for reference
+  - Correct guess (final answer on game end) shows without icon
+  - Attribute grid beneath each guess displays service characteristics for learning
+  - Updates in real-time as new guesses come in (animates into list)
+  - Sticky header with "LIVE FEED" badge at top
 
 ## Free-tier guardrails (do not violate)
 
@@ -310,6 +377,18 @@ npm run calibrate         # standalone re-check: difficulty + fact/structure cal
 npm run check:queue       # warn if queued buffer < 7 days or reserves < 5
 ```
 
+### Service Attributes & Cloud Log Metadata
+
+Each guessed service displays an attribute grid below its name showing:
+- **Category:** Colored badge (COMPUTE, STORAGE, NETWORKING, etc.)
+- **Launch Year:** Badge showing year service was released (e.g., "2015", "2020+")
+- **Model Type:** Pricing/delivery model badge (IaaS, PaaS, SaaS, Free)
+- **Pricing Structure:** Per-unit cost model (PER HOUR, PER MONTH, FREE, etc.)
+
+These attributes help players learn service distinctions while guessing and provide context for why their guess was wrong (does the answer share category with their guess? Model type? Pricing tier?).
+
+Attributes are sourced from `services-metadata.json` (enriched service vocabulary) and piped through `POST /api/guess` response as `attributeComparison` data.
+
 ## Things Claude should NOT do
 
 - Never log or return the answer, unrevealed clues, or the service-role key.
@@ -328,3 +407,4 @@ npm run check:queue       # warn if queued buffer < 7 days or reserves < 5
 - Never change the UTC rollover or puzzle numbering scheme — both are contracts with
   players' streaks and share texts.
 - Never add a paid dependency or plan upgrade without flagging it.
+- **Design:** Do not strip out the two-column layout, Cloud Log, or attribute grids without clear reason — these are the core learning loop. Do not use red/amber for misses (they are information, not errors; stick to muted tones). Do not hide the session timer or make sharing harder (both are growth vectors).

@@ -55,6 +55,7 @@ Thumbs.db
 .agents
 .impeccable
 skills-lock.json
+.mcp.json
 
 # >>> spec >>>
 # Auto-managed by `spec init`. Re-run to update; or delete the whole
