@@ -5,12 +5,21 @@ import styles from "./stats-modal.module.css";
 import { CloseIcon } from "./icons";
 import { getLocalProgress } from "@/lib/local-progress";
 
+type LeaderboardEntry = {
+  userId: string;
+  displayName: string;
+  cluesRevealed: number;
+  elapsedSeconds: number | null;
+  totalSolved: number;
+};
+
 type StatsData = {
   date: string;
   totalPlayed: number;
   totalSolved: number;
   solveRate: number;
   solveDistribution: Record<number, number>;
+  leaderboard: LeaderboardEntry[];
   myCluesRevealed: number | null;
   mySolved: boolean | null;
   todayElapsedSeconds?: number;
@@ -45,11 +54,8 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;
-    if (open) {
-      if (!el.open) el.showModal();
-    } else {
-      if (el.open) el.close();
-    }
+    if (open) { if (!el.open) el.showModal(); }
+    else { if (el.open) el.close(); }
   }, [open]);
 
   useEffect(() => {
@@ -68,7 +74,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
         if (!res.ok) { setState({ status: "error" }); return; }
         const data: StatsData = await res.json();
 
-        // For anon users, merge their local result into the server response
+        // Merge local result for anon users
         if (data.myCluesRevealed === null) {
           const local = getLocalProgress(todayDate());
           if (local?.gameOver) {
@@ -77,7 +83,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
           }
         }
 
-        // Today's elapsed time always comes from localStorage
+        // Today's elapsed time from localStorage
         const local = getLocalProgress(todayDate());
         data.todayElapsedSeconds = local?.gameOver ? local.elapsedSeconds : undefined;
 
@@ -96,9 +102,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
   }
 
   const data = state.status === "ok" ? state.data : null;
-  const maxCount = data
-    ? Math.max(1, ...Object.values(data.solveDistribution))
-    : 1;
+  const maxCount = data ? Math.max(1, ...Object.values(data.solveDistribution)) : 1;
 
   return (
     <dialog
@@ -120,6 +124,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
         <p className={styles.message}>Couldn&apos;t load stats.</p>
       ) : (
         <>
+          {/* Summary numbers */}
           <div className={styles.grid}>
             <div className={styles.stat}>
               <span className={styles.statValue}>{data!.totalPlayed}</span>
@@ -137,6 +142,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
             )}
           </div>
 
+          {/* Solve distribution */}
           <div className={styles.distribution}>
             <p className={styles.distributionTitle}>Solve Distribution</p>
             {[1, 2, 3, 4, 5].map((clue) => {
@@ -146,11 +152,7 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
               return (
                 <div key={clue} className={styles.barRow}>
                   <span className={styles.barLabel}>Clue {clue}</span>
-                  <div
-                    className={styles.barTrack}
-                    role="img"
-                    aria-label={`Clue ${clue}: ${count} player${count !== 1 ? "s" : ""}`}
-                  >
+                  <div className={styles.barTrack} role="img" aria-label={`Clue ${clue}: ${count}`}>
                     <div
                       className={`${styles.barFill} ${isMe ? styles.barFillMe : ""}`}
                       style={{ width: count === 0 ? "4px" : `${widthPct}%` }}
@@ -164,22 +166,41 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
             })}
           </div>
 
-          {data!.myCluesRevealed === null && (
-            <div className={styles.syncPrompt}>
-              <p className={styles.syncNote}>Play today&apos;s puzzle to see where you rank.</p>
+          {/* Leaderboard */}
+          {data!.leaderboard.length > 0 && (
+            <div className={styles.leaderboard}>
+              <p className={styles.distributionTitle}>Solvers</p>
+              <div className={styles.leaderboardHeader}>
+                <span>Player</span>
+                <span>Clue</span>
+                <span>Time</span>
+                <span>Total</span>
+              </div>
+              <ul className={styles.leaderboardList}>
+                {data!.leaderboard.map((entry, i) => (
+                  <li key={entry.userId} className={styles.leaderboardRow}>
+                    <span className={styles.leaderboardRank}>{i + 1}</span>
+                    <span className={styles.leaderboardName}>{entry.displayName}</span>
+                    <span className={styles.leaderboardClue}>#{entry.cluesRevealed}</span>
+                    <span className={styles.leaderboardTime}>
+                      {entry.elapsedSeconds != null ? formatTime(entry.elapsedSeconds) : "—"}
+                    </span>
+                    <span className={styles.leaderboardTotal}>{entry.totalSolved}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
-          {data!.myCluesRevealed !== null && !data!.mySolved && (
-            <div className={styles.syncPrompt}>
-              <p className={styles.syncNote}>You didn&apos;t solve today&apos;s puzzle — better luck tomorrow!</p>
-            </div>
+          {data!.leaderboard.length === 0 && (
+            <p className={styles.message}>No one has solved today&apos;s puzzle yet. Be the first!</p>
           )}
 
           {data!.myCluesRevealed === null && onSignIn && (
             <div className={styles.syncPrompt}>
+              <p className={styles.syncNote}>Sign in to appear on the leaderboard.</p>
               <button type="button" className={styles.signInButton} onClick={onSignIn}>
-                Sign in to sync across devices
+                Sign in
               </button>
             </div>
           )}

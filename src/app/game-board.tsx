@@ -204,12 +204,16 @@ export default function GameBoard() {
     setStatusMessage("");
 
     try {
+      const startedAt = progress.startedAt ?? new Date().toISOString();
+      const currentElapsed = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
+
       const res = await fetch("/api/guess", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date: puzzle.date,
           guess,
+          elapsedSeconds: currentElapsed,
         }),
       });
       const data: GuessResponse = await res.json();
@@ -223,10 +227,7 @@ export default function GameBoard() {
         ? progress.clues.length + 1
         : progress.clues.length;
 
-      const startedAt = progress.startedAt ?? new Date().toISOString();
-      const elapsedSeconds = data.gameOver
-        ? Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)
-        : undefined;
+      const elapsedSeconds = data.gameOver ? currentElapsed : undefined;
 
       const updated: LocalProgress = {
         ...progress,
@@ -238,7 +239,7 @@ export default function GameBoard() {
         answer: data.answer,
         completedAt: data.gameOver ? new Date().toISOString() : null,
         startedAt,
-        elapsedSeconds,
+        elapsedSeconds: data.gameOver ? currentElapsed : undefined,
       };
 
       setProgress(updated);

@@ -1,5 +1,5 @@
 .dialog {
-  width: min(360px, calc(100vw - var(--space-lg)));
+  width: min(420px, calc(100vw - var(--space-lg)));
   max-height: min(560px, calc(100vh - var(--space-xl)));
   overflow-y: auto;
   padding: var(--space-lg);
@@ -82,6 +82,90 @@
   flex-direction: column;
   gap: var(--space-md);
   padding: var(--space-md) 0;
+}
+
+.leaderboard {
+  padding-top: var(--space-md);
+  margin-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.leaderboardHeader {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--space-sm);
+  padding: 0 var(--space-xs) var(--space-xs);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.leaderboardList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.leaderboardRow:nth-child(odd) {
+  background: var(--surface);
+}
+
+.leaderboardRank {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.leaderboardName {
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboardClue {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  text-align: right;
+}
+
+.leaderboardTime {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  min-width: 40px;
+}
+
+.leaderboardTotal {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  min-width: 24px;
 }
 
 .syncPrompt {

@@ -7,6 +7,7 @@ export type Attempt = {
   clues_revealed: number;
   solved: boolean;
   completed_at: string | null;
+  elapsed_seconds?: number | null;
 };
 
 /** Client-scoped (RLS: user_id = auth.uid()) — safe to call with the
@@ -18,7 +19,7 @@ export async function getAttempt(
 ): Promise<Attempt | null> {
   const { data, error } = await supabase
     .from("attempts")
-    .select("user_id, puzzle_date, guesses, clues_revealed, solved, completed_at")
+    .select("user_id, puzzle_date, guesses, clues_revealed, solved, completed_at, elapsed_seconds")
     .eq("user_id", userId)
     .eq("puzzle_date", puzzleDate)
     .maybeSingle();

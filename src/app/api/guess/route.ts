@@ -39,6 +39,7 @@ const serviceMap: Map<string, ServiceEntry> = loadServiceMap();
 const bodySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   guess: z.string().min(1).max(200),
+  elapsedSeconds: z.number().int().nonnegative().optional(),
 });
 
 export async function POST(request: Request) {
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid request body" }, { status: 400 });
   }
-  const { date, guess } = parsed.data;
+  const { date, guess, elapsedSeconds } = parsed.data;
 
   if (isFutureDate(date)) {
     return NextResponse.json({ error: "puzzle not available yet" }, { status: 400 });
@@ -108,6 +109,7 @@ export async function POST(request: Request) {
       clues_revealed: nextCluesRevealed,
       solved: correct,
       completed_at: gameOver ? new Date().toISOString() : null,
+      elapsed_seconds: gameOver && elapsedSeconds != null ? elapsedSeconds : null,
     });
   }
 
