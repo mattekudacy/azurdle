@@ -5,7 +5,7 @@ import { getAttempt, upsertAttempt } from "@/lib/attempts";
 
 const localAttemptSchema = z.object({
   puzzleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  guesses: z.array(z.string()),
+  guesses: z.array(z.union([z.string(), z.object({ name: z.string(), comparison: z.any().optional() })])),
   cluesRevealed: z.number().int().min(1).max(5),
   solved: z.boolean(),
   completedAt: z.string().nullable(),
@@ -31,14 +31,20 @@ export async function POST(request: Request) {
     // Never let a stale local attempt overwrite a further-progressed server
     // record — only merge in, never regress.
     const existing = await getAttempt(supabase, userData.user.id, local.puzzleDate);
-    if (existing && existing.clues_revealed >= local.cluesRevealed && !local.solved) {
+    if (existing && (existing.solved || existing.clues_revealed >= local.cluesRevealed) && !local.solved) {
       continue;
     }
+
+    // Normalize guesses to string[] for DB storage — the client may send
+    // either legacy strings or new {name, comparison} objects.
+    const guessNames = local.guesses.map((g) =>
+      typeof g === "string" ? g : g.name,
+    );
 
     await upsertAttempt(supabase, {
       user_id: userData.user.id,
       puzzle_date: local.puzzleDate,
-      guesses: local.guesses,
+      guesses: guessNames,
       clues_revealed: local.cluesRevealed,
       solved: local.solved,
       completed_at: local.completedAt,

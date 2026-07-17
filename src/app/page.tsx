@@ -3,6 +3,7 @@ import styles from "./page.module.css";
 import GameBoard from "./game-board";
 import HowToPlay from "./how-to-play";
 import ComingSoonNav from "./coming-soon-nav";
+import AuthButton from "./auth-button";
 
 export default function Home() {
   return (
@@ -20,23 +21,24 @@ export default function Home() {
       </div>
       <main className={styles.main}>
         <div className={styles.header}>
-          <div className={styles.intro}>
-            <div className={styles.wordmark}>
-              <Image
-                src="/logo/azurdle-icon.png"
-                alt=""
-                width={40}
-                height={26}
-                priority
-                className={styles.wordmarkIcon}
-              />
-              <h1>Azurdle</h1>
-            </div>
-            <p>Guess today&apos;s Azure service in 5 clues.</p>
+          <div className={styles.wordmark}>
+            <Image
+              src="/logo/azurdle-icon.png"
+              alt=""
+              width={24}
+              height={16}
+              priority
+              className={styles.wordmarkIcon}
+            />
+            <span className={styles.wordmarkTitle}>Azurdle</span>
+            <span className={styles.wordmarkSub}>Guess today&apos;s Azure service in 5 clues</span>
           </div>
-          <HowToPlay />
+          <div className={styles.headerRight}>
+            <ComingSoonNav />
+            <HowToPlay />
+            <AuthButton />
+          </div>
         </div>
-        <ComingSoonNav />
         <GameBoard />
       </main>
     </div>

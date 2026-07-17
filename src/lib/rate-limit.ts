@@ -3,9 +3,11 @@ const MAX_REQUESTS = 10;
 
 const hits = new Map<string, { count: number; windowStart: number }>();
 
-/** Simple in-memory per-key rate limit — ~10 requests/min. Good enough for a
- * ~200-service answer space; revisit if traffic outgrows a single instance. */
-export function isRateLimited(key: string): boolean {
+/** Simple in-memory per-key rate limit — ~10 requests/min.
+ * NOTE: unreliable across Vercel serverless instances (each cold start has its
+ * own map), but the HMAC-signed cookie already closes the one-request answer
+ * extraction path, so this is a best-effort second layer, not a hard gate. */
+export async function isRateLimited(key: string): Promise<boolean> {
   const now = Date.now();
   const entry = hits.get(key);
 

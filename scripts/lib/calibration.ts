@@ -3,6 +3,7 @@ import { tavilySearch } from "./tavily";
 import { parseJsonResponse } from "./json";
 import type { ToolDefinition } from "./chat-types";
 import type { Puzzle } from "../../src/lib/puzzle-schema";
+import type { ServiceEntry } from "../../src/lib/service-entry";
 
 export type CalibrationResult =
   | { passed: true }
@@ -26,7 +27,7 @@ export type CalibrationResult =
  * rate read as genuinely ambiguous to a human. The check was rejecting good
  * clues, not catching bad ones. See CLAUDE.md for the fuller rationale.
  */
-export async function calibrate(puzzle: Puzzle): Promise<CalibrationResult> {
+export async function calibrate(puzzle: Puzzle, entry?: ServiceEntry): Promise<CalibrationResult> {
   const shortlistReply = await chatText(MODEL, [
     {
       role: "system",
@@ -40,7 +41,7 @@ export async function calibrate(puzzle: Puzzle): Promise<CalibrationResult> {
     return { passed: false, reason: "too_vague" };
   }
 
-  const factResult = await passesFactCheck(puzzle);
+  const factResult = await passesFactCheck(puzzle, entry);
   if (!factResult.passed) return factResult;
 
   return { passed: true };
@@ -90,7 +91,19 @@ const SEARCH_TOOL: ToolDefinition = {
  */
 async function passesFactCheck(
   puzzle: Puzzle,
+  entry?: ServiceEntry,
 ): Promise<{ passed: true } | { passed: false; reason: "fact_check"; issues: string[] }> {
+  const attributeNote = entry
+    ? `\n\nThe following are authoritative ground-truth attributes for this service. ` +
+      `Verify that the clues are CONSISTENT with these values — a clue that contradicts ` +
+      `a known attribute (e.g. saying it scales to zero when pricingModel is "Per hour", ` +
+      `or describing it as IaaS when computeModel is "Serverless") is a facts error:\n` +
+      `  category:     ${entry.category}\n` +
+      `  launchYear:   ${entry.launchYear}\n` +
+      `  computeModel: ${entry.computeModel}\n` +
+      `  pricingModel: ${entry.pricingModel}`
+    : "";
+
   const reply = await runWithTools(
     MODEL,
     [
@@ -120,7 +133,7 @@ async function passesFactCheck(
           answer: puzzle.answer,
           aliases: puzzle.aliases,
           clues: puzzle.clues,
-        }),
+        }) + attributeNote,
       },
     ],
     [SEARCH_TOOL],

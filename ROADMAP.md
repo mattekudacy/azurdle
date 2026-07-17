@@ -3,49 +3,88 @@
 Not yet scheduled — tracked here so they don't get lost. See `CLAUDE.md` for
 the current design/security baseline these build on top of.
 
-## Signed anonymous progress
+## ~~Signed anonymous progress~~ ✓ done
 
-**Problem:** `POST /api/guess` trusts `priorGuesses` as reported by the client
-for anonymous play (see `src/app/api/guess/route.ts` — "Anonymous play has no
-server-side session, so the client (localStorage) reports its own progress").
-Clearing localStorage (incognito, a different browser, manually editing
-storage) lets an anonymous player replay today's puzzle with a full 5 guesses
-again. Signed-in play is unaffected — progress there is authoritative from
-the `attempts` table.
+**Problem:** `POST /api/guess` trusted `priorGuesses` as reported by the client
+for anonymous play, letting anyone forge "I haven't guessed yet" by wiping their
+storage — or worse, forge 4 prior guesses in a single request to reach `gameOver`
+and extract today's answer in one unauthenticated call.
 
-**Fix:** a signed cookie (HMAC over `{ date, guesses, cluesRevealed }`) that
-the server sets after each guess and validates on the next one. Keeps
-anonymous play stateless server-side (no new table, no session store) while
-making the client unable to forge "I haven't guessed yet" by wiping its own
-storage — a cookie the client can't produce a valid signature for is
-worthless to forge. Highest-impact fix of the three here: closes the one
-actual cheat path, for a small, contained change.
+**Fix shipped:** `src/lib/anon-progress.ts` — HMAC-signed cookie
+(`azurdle-progress`, `httpOnly`, `sameSite=lax`) that the server sets after each
+anonymous guess and validates on the next one. The `priorGuesses` field was
+removed from the request schema entirely. Signed-in play still uses the
+`attempts` table as the authoritative source.
 
-## Rate limiting that matches the deployment
+**Required env var:** `ANONYMOUS_PROGRESS_SECRET` — a 32-byte hex secret
+(generate with `openssl rand -hex 32`). Add it to Vercel env settings and your
+local `.env.local`.
 
-**Problem:** `src/lib/rate-limit.ts` is an in-memory `Map`, explicitly scoped
-as "good enough for a ~200-service answer space." On Vercel's serverless
-model, each function invocation can land on a different instance with its
-own memory — the map isn't shared across instances, so the ~10/min limit is
-unreliable in production even though it works fine in a single long-running
-process (e.g. local dev).
+## Rate limiting (kept in-memory, intentionally)
 
-**Fix:** move to a shared store. Upstash Redis has a free tier and a
-drop-in `@upstash/ratelimit` package that's a near 1:1 swap for
-`isRateLimited()`'s call sites — estimated ~20 minutes of work, not a
-redesign.
+**Status:** the in-memory `Map` is still in place. It's unreliable across Vercel
+serverless instances, but the HMAC-signed cookie now closes the actual exploit
+path (one-request answer extraction). The rate limiter is a best-effort second
+layer — not a hard gate. No shared store added.
 
-## API route test coverage
+## ~~API route test coverage~~ ✓ done
 
-**Problem:** `src/lib/guess.test.ts` covers the pure guess-matching logic
-(`normalizeGuess`, `isCorrectGuess`) well, but nothing exercises
-`POST /api/guess` itself — clue-gating (revealing exactly one new clue per
-miss), game-over transitions (win/loss, `MAX_GUESSES`), and the
-already-solved rejection path. These are exactly the paths a future change
-is most likely to regress, and exactly the ones with zero coverage today.
+**Problem:** no tests exercised `POST /api/guess` itself — clue-gating, game-over
+transitions, the already-solved rejection path, or the anonymous cookie path.
 
-**Fix:** Vitest + a mocked Supabase client (mock `createClient`/`getAttempt`/
-`upsertAttempt`) driving the route handler directly, asserting on the JSON
-response shape and status codes for: first guess, wrong guess reveals next
-clue, correct guess ends game, guess after `gameOver` is rejected, guess on
-an already-solved puzzle is rejected.
+**Fix shipped:**
+- `src/lib/anon-progress.test.ts` — 6 unit tests for the HMAC round-trip and
+  tamper detection.
+- `src/app/api/guess/route.test.ts` — 14 integration tests covering: anon fresh
+  start, anon wrong guess reveals next clue, anon correct guess, anon alias guess,
+  cookie-carry-over, stale-date cookie ignored, priorGuesses body field ignored,
+  authenticated path, already-solved rejection, future date rejection, puzzle not
+  found, malformed body, rate limit 429, x-forwarded-for last-hop extraction.
+
+## ~~Vocab expansion~~ ✓ done
+
+**Problem:** 70 services + 90-day exclusion left ~43 eligible at any time —
+regulars would meta-game recency.
+
+**Fix shipped:** `public/vocab/services.json` expanded from 70 → 144 distinct
+Azure services. Organized by category (compute, containers, storage, databases,
+networking, security, messaging, AI/ML, IoT, devtools, monitoring). No
+duplicates.
+
+## ~~Streaks / stats endpoint~~ ✓ done
+
+**Fix shipped:** `GET /api/stats` (auth required) — returns `totalPlayed`,
+`totalSolved`, `solveRate`, `currentStreak`, `maxStreak`, `solveDistribution`
+(solve count by clue number 1–5). Pure SQL query over the existing `attempts`
+table; no new schema required.
+
+## ~~x-forwarded-for spoofing fix~~ ✓ done
+
+**Fix shipped:** rate limiter now keys on the *last* hop in the
+`x-forwarded-for` chain (`.split(",").at(-1).trim()`), which is the value Vercel
+appended (unforgeable), not the first which an attacker can spoof.
+
+## ~~migrate overwrites wins bug~~ ✓ done
+
+**Fix shipped:** skip condition in `POST /api/migrate` now also checks
+`existing.solved` — prevents a stale localStorage attempt from overwriting a
+server-side solved record.
+
+---
+
+## Pokedle attribute comparison (P3 — plan separately)
+
+The attribute comparison mechanic from Pokédle slots in naturally on top of the
+existing architecture. `services.json` evolves from `string[]` to `ServiceEntry[]`
+objects (name, category, computeModel, launchYear, pricingModel, awsEquivalent).
+`POST /api/guess` returns an attribute comparison object for wrong guesses
+alongside (or instead of) the next prose clue. The existing clue ladder becomes
+a progressive hint system that unlocks every couple of misses.
+
+This is a session-scale refactor with real product value. Do after the
+foundation is solid. Requires:
+1. Schema migration: `services.json` → objects
+2. Autocomplete client update
+3. `/api/guess` response shape change (backwards-compat consideration)
+4. New UI component for attribute comparison grid
+5. Comparison logic (pure, trivially testable)

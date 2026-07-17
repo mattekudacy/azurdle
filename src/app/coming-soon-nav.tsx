@@ -1,23 +1,23 @@
 import styles from "./coming-soon-nav.module.css";
-import { ArchiveIcon, StatsIcon } from "./icons";
+import { ArchiveIcon } from "./icons";
+import StatsButton from "./stats-button";
 
-const ITEMS = [
-  { label: "Archive", Icon: ArchiveIcon },
-  { label: "Stats", Icon: StatsIcon },
-];
-
-/** Visual placeholders only — no archive/stats backend exists yet. Disabled
- * and labeled "Soon" rather than wired to fake data. */
+/** Archive is still a placeholder; Stats is now live. */
 export default function ComingSoonNav() {
   return (
-    <div className={styles.nav} role="group" aria-label="Coming soon">
-      {ITEMS.map(({ label, Icon }) => (
-        <button key={label} type="button" disabled className={styles.item} title={`${label}, coming soon`}>
-          <Icon />
-          <span>{label}</span>
-          <span className={styles.badge}>Soon</span>
-        </button>
-      ))}
+    <div className={styles.nav} role="group" aria-label="Navigation">
+      <button
+        key="Archive"
+        type="button"
+        disabled
+        className={styles.item}
+        title="Archive, coming soon"
+      >
+        <ArchiveIcon />
+        <span>Archive</span>
+        <span className={styles.badge}>Soon</span>
+      </button>
+      <StatsButton />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import styles from "./autocomplete-input.module.css";
 import { SearchIcon } from "./icons";
 import { normalizeGuess } from "@/lib/guess";
+import type { ServiceEntry } from "@/lib/service-entry";
 
 const MAX_SUGGESTIONS = 8;
 
@@ -27,7 +28,9 @@ type AutocompleteInputProps = {
 
 let vocabPromise: Promise<string[]> | null = null;
 function loadVocab(): Promise<string[]> {
-  vocabPromise ??= fetch("/vocab/services.json").then((res) => res.json());
+  vocabPromise ??= fetch("/vocab/services.json")
+    .then((res) => res.json() as Promise<ServiceEntry[]>)
+    .then((entries) => entries.map((e) => e.name));
   return vocabPromise;
 }
 

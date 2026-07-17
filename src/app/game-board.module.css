@@ -1,25 +1,71 @@
 .board {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   width: 100%;
-  /* Fills the bounded height page.module.css's .main sets, so .scrollArea
-     below can claim "whatever's left" and scroll internally, while the
-     guess bar stays put — the fix for always having to scroll to answer. */
   min-height: 0;
   flex: 1;
 }
 
-.scrollArea {
+.columns {
+  display: flex;
+  gap: var(--space-md);
+  min-height: 0;
+  flex: 1;
+}
+
+.leftCol {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  flex: 55;
   min-height: 0;
+}
+
+.clueScroll {
+  flex: 1;
   overflow-y: auto;
-  /* Small inset so content doesn't visually touch the card edge or hide
-     under a focus ring when scrolled to the top/bottom. */
+  min-height: 0;
   padding-right: 2px;
   margin-right: -2px;
+}
+
+.rightCol {
+  flex: 45;
+  overflow-y: auto;
+  min-height: 0;
+  border-left: 1px solid var(--border);
+  padding-left: var(--space-md);
+  /* Subtle tint so the guess log reads as a distinct panel */
+  background: var(--surface);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  margin-right: calc(-1 * var(--space-lg));
+  margin-top: calc(-1 * var(--space-md));
+  margin-bottom: calc(-1 * var(--space-md));
+}
+
+.logEmpty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: var(--space-lg);
+  text-align: center;
+  line-height: 1.6;
+  padding: 0 var(--space-sm);
+}
+
+@media (max-width: 680px) {
+  .columns {
+    flex-direction: column;
+  }
+  .rightCol {
+    border-left: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-right: calc(-1 * var(--space-md));
+    margin-top: 0;
+    padding: var(--space-sm) var(--space-md);
+    border-top: 1px solid var(--border);
+  }
 }
 
 .guessBar {
@@ -111,6 +157,16 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.timer {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 .clueList {
@@ -132,9 +188,8 @@
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--ink);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.5;
-  max-width: 70ch;
   /* Each clue mounts once (stable key) and never re-renders after, so this
      only plays the moment a wrong guess reveals it — the clue ladder is the
      plot, and each rung should visibly arrive. */
@@ -207,43 +262,77 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  height: 100%;
 }
 
 .cloudLogLabel {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-xs);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
 }
 
 .guessList {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-sm);
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* Guess without attribute grid — full-width row. */
 .guessItem {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
+  background: var(--bg);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--muted);
   animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Guess with attribute grid — column container: [row] [grid]. */
+.guessItemWithGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The name row inside a guessItemWithGrid. */
+.guessItemPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .guessItemIcon {
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .form {
@@ -381,6 +470,33 @@
   }
 }
 
+.shareButton {
+  align-self: flex-start;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.shareButton:hover {
+  background: var(--surface);
+}
+
+.shareButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.shareButtonCopied {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .statusMessage {
   min-height: 20px;
   font-size: 14px;
@@ -393,6 +509,7 @@
   .clue,
   .clueMissReveal,
   .guessItem,
+  .guessItemWithGrid,
   .inputRowShake,
   .resultBanner {
     transition: none;

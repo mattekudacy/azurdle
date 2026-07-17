@@ -1,0 +1,225 @@
+.dialog {
+  width: min(400px, calc(100vw - var(--space-lg)));
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+
+.dialog[open] {
+  animation: modalReveal 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalReveal {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] { animation: none; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.close:hover { background: var(--surface); color: var(--ink); }
+.close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.oauthGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.oauthButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 11px var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.oauthButton:hover { background: var(--surface); }
+.oauthButton:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.emailToggle {
+  padding: 11px var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.emailToggle:hover { background: var(--surface); }
+.emailToggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.modeTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.modeTab,
+.modeTabActive {
+  padding: 8px var(--space-md);
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 150ms ease-out;
+}
+
+.modeTabActive {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.modeTab:hover { color: var(--ink); }
+.modeTab:focus-visible,
+.modeTabActive:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.input {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  transition: border-color 150ms ease-out;
+}
+
+.input:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.error {
+  font-size: 13px;
+  color: #c0392b;
+}
+
+.submitButton {
+  padding: 11px var(--space-md);
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.submitButton:hover:not(:disabled) { background: var(--primary-hover); }
+.submitButton:disabled { opacity: 0.5; cursor: not-allowed; }
+.submitButton:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.backLink {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.backLink:hover { color: var(--ink); }
+
+.message {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oauthButton, .emailToggle, .input, .submitButton, .modeTab, .modeTabActive {
+    transition: none;
+  }
+}

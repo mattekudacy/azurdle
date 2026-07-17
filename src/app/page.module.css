@@ -23,8 +23,6 @@
 .topbarIcon {
   height: auto;
   width: 22px;
-  /* The logo mark is Azure Blue on a transparent PNG; inverted so it
-     reads as white against the same-hue top bar instead of vanishing. */
   filter: brightness(0) invert(1);
 }
 
@@ -34,41 +32,36 @@
   letter-spacing: -0.01em;
 }
 
+.topbarRight {
+  margin-left: auto;
+}
+
 .main {
   display: flex;
   width: 100%;
-  max-width: 560px;
+  max-width: 800px;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-lg);
-  margin: var(--space-xl) var(--space-md);
+  gap: var(--space-md);
+  margin: var(--space-lg) var(--space-md);
   padding: var(--space-lg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background-color: var(--bg);
   box-shadow: var(--shadow-card);
-  /* Bounds the card to the viewport (minus the topbar + this card's own
-     top/bottom margin) so GameBoard's guess bar never scrolls off-screen —
-     the clue list scrolls internally instead. overflow: hidden hands that
-     job to GameBoard's own scroll region, not this element. */
-  max-height: calc(100dvh - 48px - 2 * var(--space-xl));
+  max-height: calc(100dvh - 48px - 2 * var(--space-lg));
   overflow: hidden;
 }
 
+/* Compact single-row header — wordmark left, nav+help right */
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
+  gap: var(--space-md);
   flex-shrink: 0;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: var(--space-xs);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
 }
 
 .wordmark {
@@ -79,26 +72,36 @@
 
 .wordmarkIcon {
   height: auto;
-  width: 32px;
+  width: 24px;
 }
 
-.intro h1 {
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
-  font-weight: 600;
-  line-height: 1.15;
+.wordmarkTitle {
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 
-.intro p {
-  font-size: 16px;
-  line-height: 1.5;
+.wordmarkSub {
+  font-size: 13px;
   color: var(--muted);
+  margin-left: var(--space-xs);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 @media (max-width: 600px) {
   .main {
-    margin: var(--space-lg) var(--space-sm);
+    margin: var(--space-sm) var(--space-xs);
     padding: var(--space-md);
+    max-height: calc(100dvh - 48px - 2 * var(--space-sm));
+  }
+
+  .wordmarkSub {
+    display: none;
   }
 }

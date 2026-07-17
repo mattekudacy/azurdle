@@ -9,6 +9,13 @@
   --primary-hover: oklch(0.461 0.132 250.3);
   --accent-wash: oklch(0.51 0.165 142.7);
   --accent-ink: #fff;
+  /* Attribute grid: green = exact, yellow = close (year direction), red = no match */
+  --attr-hit:    oklch(0.51 0.165 142.7);   /* green */
+  --attr-hit-ink: #fff;
+  --attr-close:  oklch(0.75 0.17 85);       /* amber/yellow */
+  --attr-close-ink: oklch(0.28 0.06 70);
+  --attr-miss:   oklch(0.57 0.18 21);       /* red */
+  --attr-miss-ink: #fff;
   --border: oklch(0.905 0.003 67.8);
   --grid-dot: oklch(0.568 0.167 251.3 / 0.06);
   --topbar: oklch(0.568 0.167 251.3);

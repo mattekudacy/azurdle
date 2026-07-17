@@ -6,6 +6,7 @@ import { parseJsonResponse } from "./lib/json";
 import { calibrate } from "./lib/calibration";
 import { puzzleSchema, type Puzzle } from "../src/lib/puzzle-schema";
 import { normalizeGuess } from "../src/lib/guess";
+import type { ServiceEntry } from "../src/lib/service-entry";
 
 const MAX_REGENERATION_ATTEMPTS = 3;
 const EXCLUSION_WINDOW_DAYS = 90;
@@ -17,9 +18,9 @@ const BUFFER_OFFSET_DAYS = 14;
 // drafting model only ever proposes services it already "knows" well
 // enough to think of unprompted, so newly-added entries (e.g. Microsoft
 // Foundry) never surface as answers even though players can guess them.
-function loadServiceVocab(): string[] {
+function loadServiceVocab(): ServiceEntry[] {
   const path = join(__dirname, "..", "public", "vocab", "services.json");
-  return JSON.parse(readFileSync(path, "utf-8"));
+  return JSON.parse(readFileSync(path, "utf-8")) as ServiceEntry[];
 }
 
 const CLUE_LADDER_SPEC = `
@@ -58,6 +59,13 @@ candidate set (clue 1 fits ~15 services, clue 5 fits exactly 1):
    the ONLY clue allowed to single out exactly one service. If clues 2-4 already
    did that, the ladder is broken even if clue 5 itself is fine.
 Avoid clues that go stale: no exact prices, no tier names Microsoft shuffles often.
+
+IMPORTANT — attribute consistency: the game shows players structured metadata for
+each guess they make. Your clues MUST be consistent with the answer service's known
+attributes (provided in the prompt). If the computeModel is "Serverless", don't
+describe it as always-on infrastructure. If the pricingModel is "Per hour", don't say
+it scales to zero. The attributes are ground truth; contradicting them in the clues
+confuses players and breaks the hint system.
 `.trim();
 
 // Writes straight to Supabase as `queued` — never to a git file, and never
@@ -148,9 +156,17 @@ async function nextPuzzleNumber(supabase: ReturnType<typeof getAdminClient>): Pr
 }
 
 async function draftPuzzle(
-  eligibleAnswers: string[],
+  entry: ServiceEntry,
   slot: { date: string; number: number } | { status: "reserve" },
 ): Promise<Puzzle> {
+  const attributeBlock =
+    `Answer service attributes (ground truth — your clues MUST be consistent with these):\n` +
+    `  name:         ${entry.name}\n` +
+    `  category:     ${entry.category}\n` +
+    `  launchYear:   ${entry.launchYear}\n` +
+    `  computeModel: ${entry.computeModel}\n` +
+    `  pricingModel: ${entry.pricingModel}`;
+
   const content = await chatText(
     MODEL,
     [
@@ -164,9 +180,10 @@ async function draftPuzzle(
       {
         role: "user",
         content:
-          `${CLUE_LADDER_SPEC}\n\nThe "answer" MUST be exactly one of the services in this list — copy the ` +
-          "spelling exactly, do not invent a service or use a different name/abbreviation for the answer " +
-          `field (aliases are still fine for alternate names players might type):\n${eligibleAnswers.join(", ")}`,
+          `${CLUE_LADDER_SPEC}\n\n` +
+          `${attributeBlock}\n\n` +
+          `The "answer" field MUST be exactly: ${entry.name}\n` +
+          `Copy the spelling exactly. Aliases should include common abbreviations and alternate names players might type.`,
       },
     ],
     { json: true },
@@ -174,8 +191,8 @@ async function draftPuzzle(
 
   const draft = parseJsonResponse<Record<string, unknown>>(content);
   return "status" in slot
-    ? puzzleSchema.parse({ ...draft, status: "reserve" })
-    : puzzleSchema.parse({ ...draft, date: slot.date, number: slot.number, status: "queued" });
+    ? puzzleSchema.parse({ ...draft, answer: entry.name, status: "reserve" })
+    : puzzleSchema.parse({ ...draft, answer: entry.name, date: slot.date, number: slot.number, status: "queued" });
 }
 
 /**
@@ -189,14 +206,21 @@ async function generateOne(mode: "queued" | "reserve") {
   const excludedSet = new Set(excludedAnswers.map(normalizeGuess));
 
   const vocab = loadServiceVocab();
-  const eligibleAnswers = vocab.filter((service) => !excludedSet.has(normalizeGuess(service)));
-  if (eligibleAnswers.length === 0) {
+  const eligibleEntries = vocab.filter((entry) => !excludedSet.has(normalizeGuess(entry.name)));
+  if (eligibleEntries.length === 0) {
     // Every service in the vocab was used in the last 90 days (or is
     // already a reserve puzzle) — should be unreachable at ~70 services
     // and 1 puzzle/day, but fail loudly rather than draft from an empty
     // candidate list.
     throw new Error("No eligible answers left — every vocab service is within the exclusion window");
   }
+
+  // Pick the answer here (not in the model) — so we can pass the full
+  // ServiceEntry metadata to the drafting prompt for attribute-grounded clues.
+  // Use crypto-random selection to avoid bias toward the start of the list.
+  const { randomInt } = await import("crypto");
+  const chosenEntry = eligibleEntries[randomInt(eligibleEntries.length)];
+  console.log(`Selected answer: ${chosenEntry.name}`);
 
   const slot =
     mode === "reserve"
@@ -206,22 +230,16 @@ async function generateOne(mode: "queued" | "reserve") {
 
   for (let attempt = 1; attempt <= MAX_REGENERATION_ATTEMPTS; attempt++) {
     console.log(`Generating ${label} (attempt ${attempt}/${MAX_REGENERATION_ATTEMPTS})`);
-    const puzzle = await draftPuzzle(eligibleAnswers, slot);
+    const puzzle = await draftPuzzle(chosenEntry, slot);
 
-    const normalizedAnswer = normalizeGuess(puzzle.answer);
-    const matchedVocabEntry = eligibleAnswers.find(
-      (service) => normalizeGuess(service) === normalizedAnswer,
-    );
-    if (!matchedVocabEntry) {
-      console.log(`Answer "${puzzle.answer}" is not in the eligible vocab list, regenerating`);
+    // The model is instructed to use the exact answer name, and we also
+    // enforce it in draftPuzzle — but validate here as a final safety check.
+    if (normalizeGuess(puzzle.answer) !== normalizeGuess(chosenEntry.name)) {
+      console.log(`Answer mismatch: expected "${chosenEntry.name}", got "${puzzle.answer}" — regenerating`);
       continue;
     }
-    // Snap to the vocab's exact spelling even on a near-match (different
-    // casing/whitespace) — keeps the stored answer consistent with what
-    // autocomplete actually offers players.
-    puzzle.answer = matchedVocabEntry;
 
-    const result = await calibrate(puzzle);
+    const result = await calibrate(puzzle, chosenEntry);
     if (!result.passed) continue;
 
     const { error } = await supabase.from("puzzles").insert(puzzle);
