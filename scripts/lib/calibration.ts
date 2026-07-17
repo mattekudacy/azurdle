@@ -121,18 +121,20 @@ async function passesFactCheck(
           "when you're not fully certain a claim is accurate or current, especially for services you may not " +
           "know well. Verify the puzzle below and respond with ONLY a JSON object: " +
           '{"factsCorrect": boolean, "clue5Unique": boolean, "ladderAscending": boolean, "issues": string[]}. ' +
-          "factsCorrect: is every factual claim actually made in the clues (which may include an AWS " +
-          "equivalent, an abbreviation, or another specific claim — not all three are required, and some " +
-          "Azure services genuinely have no common abbreviation, which is NOT itself an error) accurate and " +
-          "current for Azure today? Do not fail this because a claim type is absent — only because a claim " +
-          "that IS made is wrong. clue5Unique: does clue 5 alone identify exactly this one service, not a " +
-          "family of services? ladderAscending: does each clue get MORE specific than the last, with no clue " +
-          "before the last one already giving away the exact answer? issues: a list of specific problems " +
-          "found. MANDATORY: if factsCorrect, clue5Unique, or ladderAscending is false, issues MUST contain " +
-          "at least one specific, concrete explanation naming which clue and what is wrong with it — never " +
-          "return false for any field with an empty issues array. Only return an empty issues array when " +
-          "all three fields are true. Once you've verified (searching if needed), respond with ONLY the JSON " +
-          "object — no other text.",
+          "factsCorrect: is every factual claim actually made in the clues (which may include an " +
+          "abbreviation or unique product fact — NOT an AWS equivalent, which is banned as a clue) accurate " +
+          "and current for Azure today? Fail factsCorrect if clue 5 states the AWS equivalent of the service " +
+          "as its giveaway — that is a design error, not a facts error per se, but use this field to flag " +
+          "it. Some Azure services genuinely have no common abbreviation, which is NOT itself an error. " +
+          "Do not fail this because a claim type is absent — only because a claim that IS made is wrong OR " +
+          "because clue 5 is just 'the AWS equivalent is X'. clue5Unique: does clue 5 alone identify " +
+          "exactly this one service, not a family of services? ladderAscending: does each clue get MORE " +
+          "specific than the last, with no clue before the last one already giving away the exact answer? " +
+          "issues: a list of specific problems found. MANDATORY: if factsCorrect, clue5Unique, or " +
+          "ladderAscending is false, issues MUST contain at least one specific, concrete explanation naming " +
+          "which clue and what is wrong with it — never return false for any field with an empty issues " +
+          "array. Only return an empty issues array when all three fields are true. Once you've verified " +
+          "(searching if needed), respond with ONLY the JSON object — no other text.",
       },
       {
         role: "user",

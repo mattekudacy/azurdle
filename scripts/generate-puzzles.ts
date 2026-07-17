@@ -95,9 +95,15 @@ candidate set (clue 1 fits ~15 services, clue 5 fits exactly 1):
    zero. If clue 4's term is so specific that literally only the answer service
    has it, that's clue 5's job, not clue 4's — pull the giveaway back to clue 5
    and use a softer, still-narrowing-but-shared term for clue 4.
-5. The giveaway — AWS equivalent, abbreviation, or unique product fact. This is
-   the ONLY clue allowed to single out exactly one service. If clues 2-4 already
-   did that, the ladder is broken even if clue 5 itself is fine.
+5. The giveaway — a fact that unmistakably identifies this one service.
+   Prefer in this order: (a) the service's well-known abbreviation or brand
+   name (e.g. "AKS", "APIM", "ACR"); (b) a unique product fact that only this
+   service has (launched year, a one-of-a-kind feature, a specific SKU name);
+   (c) its AWS equivalent ONLY as a last resort when (a) and (b) are weak or
+   absent — many players don't know AWS and it makes the puzzle trivial for
+   those who do. Never use the AWS equivalent as the default clue 5.
+   This is the ONLY clue allowed to single out exactly one service. If clues
+   2-4 already did that, the ladder is broken even if clue 5 itself is fine.
 Avoid clues that go stale: no exact prices, no tier names Microsoft shuffles often.
 
 IMPORTANT — attribute consistency: the game shows players structured metadata for
@@ -199,19 +205,26 @@ async function draftPuzzle(
   entry: ServiceEntry,
   slot: { date: string; number: number } | { status: "reserve" },
 ): Promise<Puzzle> {
+  // awsEquivalent is intentionally kept OUT of the "ground truth" block.
+  // Listing it there signals the model to reference it in the clues, which
+  // makes clue 5 trivially easy for anyone who knows AWS. It's provided
+  // separately as background context to avoid clue CONTRADICTIONS only.
   const attributeBlock =
     `Answer service attributes (ground truth — your clues MUST be consistent with these):\n` +
     `  name:         ${entry.name}\n` +
     `  category:     ${entry.category}\n` +
     `  launchYear:   ${entry.launchYear}\n` +
     `  computeModel: ${entry.computeModel}\n` +
-    `  pricingModel: ${entry.pricingModel}\n` +
-    `  awsEquivalent: ${entry.awsEquivalent}` +
+    `  pricingModel: ${entry.pricingModel}` +
     (entry.description ? `\n  description:  ${entry.description}` : "") +
     (entry.tags?.length ? `\n  tags:         ${entry.tags.join(", ")}` : "") +
     (entry.documentation_links?.length
       ? `\n\nOfficial documentation (cite facts from here, not from memory):\n` +
         entry.documentation_links.map((l) => `  - ${l}`).join("\n")
+      : "") +
+    (entry.awsEquivalent && entry.awsEquivalent !== "None"
+      ? `\n\nBackground reference (do NOT copy directly into a clue — it trivializes clue 5 for ` +
+        `AWS users):\n  awsEquivalent: ${entry.awsEquivalent}`
       : "");
 
   const content = await chatText(
