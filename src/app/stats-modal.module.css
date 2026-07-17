@@ -130,7 +130,7 @@
 }
 
 .leaderboardRank {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 11px;
   color: var(--muted);
   text-align: right;
@@ -145,7 +145,7 @@
 }
 
 .leaderboardClue {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   color: var(--primary);
   font-weight: 600;
@@ -153,7 +153,7 @@
 }
 
 .leaderboardTime {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   color: var(--muted);
   text-align: right;
@@ -161,7 +161,7 @@
 }
 
 .leaderboardTotal {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 12px;
   color: var(--muted);
   text-align: right;
@@ -226,7 +226,7 @@
 }
 
 .statValue {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 36px;
   font-weight: 600;
   line-height: 1;
@@ -306,7 +306,7 @@
   flex-shrink: 0;
   width: 24px;
   text-align: right;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 13px;
   color: var(--muted);
 }

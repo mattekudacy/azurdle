@@ -14,7 +14,7 @@
 }
 
 .time {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
   font-size: 28px;
   font-weight: 600;
   color: var(--primary);
