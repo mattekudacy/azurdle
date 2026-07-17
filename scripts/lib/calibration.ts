@@ -101,7 +101,14 @@ async function passesFactCheck(
       `  category:     ${entry.category}\n` +
       `  launchYear:   ${entry.launchYear}\n` +
       `  computeModel: ${entry.computeModel}\n` +
-      `  pricingModel: ${entry.pricingModel}`
+      `  pricingModel: ${entry.pricingModel}` +
+      (entry.awsEquivalent ? `\n  awsEquivalent: ${entry.awsEquivalent}` : "") +
+      (entry.description ? `\n  description:  ${entry.description}` : "") +
+      (entry.documentation_links?.length
+        ? `\n\nOfficial documentation links for this service (search these URLs first before ` +
+          `using search_web — they are the authoritative source for fact-checking):\n` +
+          entry.documentation_links.map((l) => `  - ${l}`).join("\n")
+        : "")
     : "";
 
   const reply = await runWithTools(

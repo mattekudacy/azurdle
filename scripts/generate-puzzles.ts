@@ -18,9 +18,49 @@ const BUFFER_OFFSET_DAYS = 14;
 // drafting model only ever proposes services it already "knows" well
 // enough to think of unprompted, so newly-added entries (e.g. Microsoft
 // Foundry) never surface as answers even though players can guess them.
+//
+// services-metadata.json covers ~half the vocab with extra fields
+// (description, tags, documentation_links). We join on normalized name
+// and merge them in so the drafting prompt and fact-checker get richer,
+// factually-anchored source material — especially useful for obscure or
+// recently-added services where the model's training data is thin.
+type MetadataEntry = {
+  name: string;
+  description?: string;
+  tags?: string[];
+  documentation_links?: string[];
+};
+
 function loadServiceVocab(): ServiceEntry[] {
-  const path = join(__dirname, "..", "public", "vocab", "services.json");
-  return JSON.parse(readFileSync(path, "utf-8")) as ServiceEntry[];
+  const vocabPath = join(__dirname, "..", "public", "vocab", "services.json");
+  const metaPath = join(__dirname, "..", "public", "vocab", "services-metadata.json");
+
+  const vocab = JSON.parse(readFileSync(vocabPath, "utf-8")) as ServiceEntry[];
+
+  let metaMap = new Map<string, MetadataEntry>();
+  try {
+    const raw = JSON.parse(readFileSync(metaPath, "utf-8")) as {
+      categories: Array<{ services: MetadataEntry[] }>;
+    };
+    for (const cat of raw.categories) {
+      for (const svc of cat.services) {
+        metaMap.set(normalizeGuess(svc.name), svc);
+      }
+    }
+  } catch {
+    // metadata file is optional enrichment — generation still works without it
+  }
+
+  return vocab.map((entry) => {
+    const meta = metaMap.get(normalizeGuess(entry.name));
+    if (!meta) return entry;
+    return {
+      ...entry,
+      description: meta.description,
+      tags: meta.tags,
+      documentation_links: meta.documentation_links,
+    };
+  });
 }
 
 const CLUE_LADDER_SPEC = `
@@ -165,7 +205,14 @@ async function draftPuzzle(
     `  category:     ${entry.category}\n` +
     `  launchYear:   ${entry.launchYear}\n` +
     `  computeModel: ${entry.computeModel}\n` +
-    `  pricingModel: ${entry.pricingModel}`;
+    `  pricingModel: ${entry.pricingModel}\n` +
+    `  awsEquivalent: ${entry.awsEquivalent}` +
+    (entry.description ? `\n  description:  ${entry.description}` : "") +
+    (entry.tags?.length ? `\n  tags:         ${entry.tags.join(", ")}` : "") +
+    (entry.documentation_links?.length
+      ? `\n\nOfficial documentation (cite facts from here, not from memory):\n` +
+        entry.documentation_links.map((l) => `  - ${l}`).join("\n")
+      : "");
 
   const content = await chatText(
     MODEL,
