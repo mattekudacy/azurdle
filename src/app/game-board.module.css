@@ -598,6 +598,55 @@
   background: #f7fbff;
 }
 
+.signUpNudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border: 1px solid #cbd5e4;
+  border-radius: 12px;
+  background: #f8faff;
+}
+
+.signUpNudgeText {
+  color: #4b5564;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.signUpNudgeButton {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border: 1px solid var(--primary);
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.signUpNudgeButton:hover {
+  background: #f0f7ff;
+}
+
+@media (max-width: 620px) {
+  .signUpNudge {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .signUpNudgeButton {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 @keyframes reveal {
   from {
     opacity: 0;

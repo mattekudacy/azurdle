@@ -10,6 +10,8 @@ import { getLocalProgress, saveLocalProgress, type LocalProgress } from "@/lib/l
 import { normalizeGuess } from "@/lib/guess";
 import type { AttributeComparison } from "@/lib/attribute-comparison";
 import AttributeGrid from "./attribute-grid";
+import AuthModal from "./auth-modal";
+import { createClient } from "@/lib/supabase/client";
 
 const MAX_GUESSES = 5;
 
@@ -94,6 +96,8 @@ export default function GameBoard() {
   const [copied, setCopied] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   // Index of the clue that just arrived because of a miss — drives a
   // one-time highlight on that clue only, distinct from the fade-in every
   // clue gets on mount. Cleared after the highlight animation finishes.
@@ -149,6 +153,14 @@ export default function GameBoard() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [progress]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(!!session?.user);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Dev-only: ?reset clears today's local progress + the HttpOnly anon cookie
   // so you can replay the same puzzle without touching DevTools. No-op in prod.
@@ -430,6 +442,24 @@ export default function GameBoard() {
                 </button>
               </div>
             )}
+
+            {progress.gameOver && isSignedIn === false && (
+              <div className={styles.signUpNudge}>
+                <p className={styles.signUpNudgeText}>
+                  {progress.solved
+                    ? "Nice work! Sign in to track your streak and appear on the leaderboard."
+                    : "Keep at it — sign in to save your progress and track improvement over time."}
+                </p>
+                <button
+                  type="button"
+                  className={styles.signUpNudgeButton}
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Sign in / Create account
+                </button>
+              </div>
+            )}
+            <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
 
             {!progress.gameOver && (
               <p role="status" aria-live="polite" className={styles.statusMessage}>
