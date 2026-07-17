@@ -34,7 +34,6 @@ type State =
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSignIn?: () => void;
 };
 
 function todayDate(): string {
@@ -47,7 +46,7 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export default function StatsModal({ open, onClose, onSignIn }: Props) {
+export default function StatsModal({ open, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<State>({ status: "idle" });
 
@@ -196,14 +195,6 @@ export default function StatsModal({ open, onClose, onSignIn }: Props) {
             <p className={styles.message}>No one has solved today&apos;s puzzle yet. Be the first!</p>
           )}
 
-          {data!.myCluesRevealed === null && onSignIn && (
-            <div className={styles.syncPrompt}>
-              <p className={styles.syncNote}>Sign in to appear on the leaderboard.</p>
-              <button type="button" className={styles.signInButton} onClick={onSignIn}>
-                Sign in
-              </button>
-            </div>
-          )}
         </>
       )}
     </dialog>

@@ -7,7 +7,13 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
-    const redirectUrl = `${origin}${next}?migrated=1`;
+    // Use the stable site URL if set — on Vercel, `origin` from request.url
+    // can be a deployment-specific URL (e.g. azurdle-abc123.vercel.app) even
+    // when the user navigated to the public alias, causing a redirect to a
+    // now-expired deployment. NEXT_PUBLIC_SITE_URL is baked in at build time
+    // and always points at the canonical domain.
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? origin;
+    const redirectUrl = `${base}${next}?migrated=1`;
     const response = NextResponse.redirect(redirectUrl);
 
     // Build the Supabase client against the redirect response directly so
@@ -37,5 +43,5 @@ export async function GET(request: NextRequest) {
     if (!error) return response;
   }
 
-  return NextResponse.redirect(`${origin}/?error=auth`);
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL ?? origin}/?error=auth`);
 }
