@@ -61,6 +61,11 @@ type TodayPuzzle = {
   number: number;
   category: string;
   clues: string[];
+  // Included only when the signed-in user has already completed this puzzle
+  gameOver?: boolean;
+  solved?: boolean;
+  answer?: string;
+  cluesRevealed?: number;
 };
 
 type GuessResponse = {
@@ -172,8 +177,24 @@ export default function GameBoard() {
       .then((data) => {
         setPuzzle(data);
         const local = getLocalProgress(data.date);
-        setProgress(
-          local ?? {
+        if (local) {
+          setProgress(local);
+        } else if (data.gameOver) {
+          // Signed-in user has already completed this puzzle on another
+          // device — server told us so. Hydrate progress from the server
+          // response so they see the result immediately without a guess.
+          setProgress({
+            puzzleDate: data.date,
+            guesses: [],
+            clues: data.clues,
+            revealedDuringPlay: data.cluesRevealed ?? data.clues.length,
+            solved: data.solved ?? false,
+            gameOver: true,
+            answer: data.answer,
+            completedAt: null,
+          });
+        } else {
+          setProgress({
             puzzleDate: data.date,
             guesses: [],
             clues: data.clues,
@@ -181,8 +202,8 @@ export default function GameBoard() {
             gameOver: false,
             answer: undefined,
             completedAt: null,
-          },
-        );
+          });
+        }
         setStatus("ready");
       })
       .catch(() => setStatus("error"));

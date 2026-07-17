@@ -3,6 +3,8 @@ import { getTodayPuzzle } from "@/lib/today-puzzle";
 import { createClient } from "@/lib/supabase/server";
 import { getAttempt } from "@/lib/attempts";
 
+const MAX_GUESSES = 5;
+
 export async function GET() {
   const puzzle = await getTodayPuzzle();
 
@@ -28,12 +30,23 @@ export async function GET() {
     }
   }
 
+  const gameOver = solved || guesses.length >= MAX_GUESSES;
+
   return NextResponse.json({
     date: puzzle.date,
     number: puzzle.number,
     category: puzzle.category,
-    clues: puzzle.clues.slice(0, cluesRevealed),
+    // After game over the full ladder is already known to the player — sending
+    // all clues here is consistent with POST /api/guess's allClues field and
+    // does NOT violate the "answer never leaves the server" rule (the answer
+    // itself is only included when gameOver is true, same gating as /api/guess).
+    clues: gameOver ? puzzle.clues : puzzle.clues.slice(0, cluesRevealed),
     guesses,
     solved,
+    ...(gameOver && {
+      gameOver: true,
+      answer: puzzle.answer,
+      cluesRevealed,
+    }),
   });
 }
