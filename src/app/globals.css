@@ -1,41 +1,46 @@
 :root {
-  /* Colors — Azure Portal palette. Azure Blue (#0078D4) carries the brand
-     the same way Puzzle Indigo used to; Success Green marks the win. */
-  --bg: oklch(1 0 0);
-  --surface: oklch(0.983 0.002 67.8);
-  --ink: oklch(0.24 0.002 67.7);
-  --muted: oklch(0.483 0.004 67.7);
-  --primary: oklch(0.568 0.167 251.3);
-  --primary-hover: oklch(0.461 0.132 250.3);
-  --accent-wash: oklch(0.51 0.165 142.7);
-  --accent-ink: #fff;
+  /* Colors — Cloud-Native Gaming System (Azure Service Quest)
+     Primary Azure Blue carries the brand; Success Green marks the win;
+     Clean surface neutrals create the containerized look of the game board. */
+  --bg: #ffffff;
+  --surface: #f9f9f9;
+  --ink: #1a1c1c;
+  --muted: #404752;
+  --primary: #005faa;
+  --primary-hover: #004883;
+  --accent-wash: #107c10;
+  --accent-ink: #ffffff;
   /* Attribute grid: green = exact, yellow = close (year direction), red = no match */
-  --attr-hit:    oklch(0.51 0.165 142.7);   /* green */
-  --attr-hit-ink: #fff;
-  --attr-close:  oklch(0.75 0.17 85);       /* amber/yellow */
-  --attr-close-ink: oklch(0.28 0.06 70);
-  --attr-miss:   oklch(0.57 0.18 21);       /* red */
-  --attr-miss-ink: #fff;
-  --border: oklch(0.905 0.003 67.8);
-  --grid-dot: oklch(0.568 0.167 251.3 / 0.06);
-  --topbar: oklch(0.568 0.167 251.3);
+  --attr-hit: #168914;
+  --attr-hit-ink: #ffffff;
+  --attr-close: #edf1f6;
+  --attr-close-ink: #424b57;
+  --attr-miss: #fff0f0;
+  --attr-miss-ink: #d31e25;
+  --border: #cbd5e4;
+  --grid-dot: #0078d4 / 0.06;
+  --topbar: #0078d4;
 
-  /* Radii — Fluent-flat: small, consistent, never pill-shaped on chrome. */
+  /* Radii — Soft roundedness (4px) reflecting modular cloud architecture */
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-lg: 4px;
   --radius-pill: 999px;
 
-  /* Spacing */
+  /* Spacing — aligned with design system card padding and gutter */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 40px;
 
-  /* Fluent depth: flat panels lift with a soft ambient shadow, not a
-     tonal background step. */
+  /* Depth — low-contrast outlines and tonal layers, not heavy shadows */
   --shadow-card: 0 1.6px 3.6px rgb(0 0 0 / 0.08), 0 0.3px 0.9px rgb(0 0 0 / 0.06);
+
+  /* Typography — from Cloud-Native Gaming System */
+  --font-headline: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "Courier New", monospace;
 }
 
 /* Azurdle always renders its light theme, regardless of OS/browser
@@ -59,7 +64,7 @@ body {
   flex-direction: column;
   color: var(--ink);
   background: var(--surface);
-  font-family: "Segoe UI", var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

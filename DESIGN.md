@@ -1,59 +1,77 @@
 ---
 name: Azurdle
-description: A daily Azure-service guessing game for cloud-savvy players — built to feel like it lives inside the Azure Portal itself.
+description: A daily Azure-service guessing game for cloud-savvy players — Cloud-Native Gaming System with Minimalist foundation and Playful Gamification.
+source: "Stitch: Azure Service Quest (projects/11529030756862062214)"
 colors:
-  bg: "oklch(1 0 0)"
-  surface: "oklch(0.983 0.002 67.8)"
-  ink: "oklch(0.24 0.002 67.7)"
-  muted: "oklch(0.483 0.004 67.7)"
-  primary: "oklch(0.568 0.167 251.3)"
-  primary-hover: "oklch(0.461 0.132 250.3)"
-  accent-wash: "oklch(0.51 0.165 142.7)"
-  border: "oklch(0.905 0.003 67.8)"
-  topbar: "oklch(0.568 0.167 251.3)"
+  bg: "#ffffff"
+  surface: "#f9f9f9"
+  ink: "#1a1c1c"
+  muted: "#404752"
+  primary: "#005faa"
+  primary-hover: "#004883"
+  primary-container: "#0078d4"
+  secondary: "#465e90"
+  tertiary: "#107c10"
+  accent-wash: "#107c10"
+  accent-ink: "#ffffff"
+  attr-hit: "#107c10"
+  attr-hit-ink: "#ffffff"
+  attr-close: "#ffb900"
+  attr-close-ink: "#424f44"
+  attr-miss: "#d83b01"
+  attr-miss-ink: "#ffffff"
+  border: "#e1e1e1"
+  border-light: "#f3f3f3"
+  topbar: "#0078d4"
 typography:
   display:
-    fontFamily: "Segoe UI, Geist, system-ui, sans-serif"
-    fontSize: "clamp(1.75rem, 4vw, 2.25rem)"
-    fontWeight: 600
-    lineHeight: 1.15
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
+    fontSize: "40px"
+    fontWeight: 700
+    lineHeight: 1.2
     letterSpacing: "-0.01em"
-  title:
-    fontFamily: "Segoe UI, Geist, system-ui, sans-serif"
-    fontSize: "20px"
+  headline:
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
+    fontSize: "24px"
     fontWeight: 600
-    lineHeight: 1.3
+    lineHeight: 1.33
     letterSpacing: "normal"
+  title:
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 700
+    lineHeight: 1.3
+    letterSpacing: "-0.01em"
   body:
-    fontFamily: "Segoe UI, Geist, system-ui, sans-serif"
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "normal"
   label:
-    fontFamily: "Segoe UI, Geist, system-ui, sans-serif"
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
     fontSize: "13px"
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: "0.02em"
   mono:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "14px"
+    fontFamily: "IBM Plex Mono, Geist Mono, ui-monospace, monospace"
+    fontSize: "13px"
     fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: "normal"
-  countdown:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "28px"
-    fontWeight: 600
-    lineHeight: 1.2
+    lineHeight: 1.23
+    letterSpacing: "0.05em"
+  stat-mono:
+    fontFamily: "IBM Plex Mono, Geist Mono, ui-monospace, monospace"
+    fontSize: "32px"
+    fontWeight: 700
+    lineHeight: 1.25
     letterSpacing: "normal"
   micro-badge:
-    fontFamily: "Segoe UI, Geist, system-ui, sans-serif"
+    fontFamily: "Space Grotesk, Geist, system-ui, sans-serif"
     fontSize: "11px"
     fontWeight: 600
     lineHeight: 1.2
-    letterSpacing: "0.02em"
+    letterSpacing: "0.06em"
 rounded:
   sm: "2px"
   md: "4px"
@@ -71,6 +89,8 @@ components:
     textColor: "#ffffff"
     rounded: "{rounded.md}"
     padding: "12px 22px"
+    fontFamily: "{typography.label.fontFamily}"
+    fontSize: "13px"
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
     textColor: "#ffffff"
@@ -82,69 +102,132 @@ components:
     rounded: "{rounded.md}"
     padding: "14px 16px"
     border: "1px solid {colors.border}"
+    fontFamily: "{typography.body.fontFamily}"
+    fontSize: "15px"
+  cloud-log-entry:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "6px 10px"
+    border: "1px solid {colors.border}"
+    fontFamily: "{typography.mono.fontFamily}"
+    fontSize: "12px"
+  attribute-grid-hit:
+    backgroundColor: "{colors.attr-hit}"
+    textColor: "{colors.attr-hit-ink}"
+    rounded: "2px"
+    padding: "4px 8px"
+    fontSize: "11px"
+  attribute-grid-close:
+    backgroundColor: "{colors.attr-close}"
+    textColor: "{colors.attr-close-ink}"
+    rounded: "2px"
+    padding: "4px 8px"
+    fontSize: "11px"
+  attribute-grid-miss:
+    backgroundColor: "{colors.attr-miss}"
+    textColor: "{colors.attr-miss-ink}"
+    rounded: "2px"
+    padding: "4px 8px"
+    fontSize: "11px"
   guess-input:
     backgroundColor: "{colors.bg}"
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
-    padding: "12px 14px"
+    padding: "12px 14px 12px 40px"
+    border: "1px solid {colors.border}"
+    fontFamily: "{typography.body.fontFamily}"
+    fontSize: "16px"
+  result-banner-win:
+    backgroundColor: "{colors.tertiary}"
+    textColor: "#ffffff"
+    rounded: "{rounded.md}"
+    padding: "14px 16px"
+    fontFamily: "{typography.label.fontFamily}"
+    fontSize: "16px"
+  result-banner-loss:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "14px 16px"
+    border: "1px solid {colors.border}"
+    fontFamily: "{typography.label.fontFamily}"
+    fontSize: "16px"
 ---
 
 # Design System: Azurdle
 
 ## 1. Overview
 
-**Creative North Star: "Inside the Portal"**
+**Creative North Star: "Cloud-Native Gaming System"**
 
-Azurdle now deliberately looks like it lives inside the Azure Portal: real Azure Blue (`#0078D4`), a top bar carrying the wordmark like an app header, flat white panels with a thin neutral border and a soft ambient shadow for lift, and a Fluent-flavored small-radius corner system throughout. The audience already lives in this chrome forty hours a week — recognizing it immediately, on sight, is the point. This is a full reversal of the previous "anti-corporate-portal" direction; that system is retired.
+Applied from **Stitch project Azure Service Quest** (`projects/11529030756862062214`), this design system fuses **Corporate Modern** with **Playful Gamification**. It leverages Azure's trusted architectural foundations while injecting discovery and delight essential for a daily guessing game. The visual narrative centers on "The Cloud Log"—a clean, data-driven aesthetic that feels like a developer's console reimagined for leisure.
 
 **Key Characteristics:**
-- Azure Blue as the single dominant brand color, carried on the top bar, primary actions, and clue-number badges
-- Success Green reserved for the one moment a guess is correct
-- Flat white cards, thin `border` stroke, and a soft ambient `--shadow-card` for depth — Fluent's card language, not a tonal-surface system
+- Azure Blue (`#005faa` deep, `#0078d4` primary) as the brand anchor, carried on the top bar, primary actions, and clue-number badges
+- Success Green (`#107c10`) reserved for the celebratory "correct guess" banner
+- Space Grotesk typography for a sharper, more contemporary "tech" feel (replaces Segoe UI)
+- IBM Plex Mono for technical metadata, Cloud Log timestamps, and tag labels
+- Clean surface grays (#f9f9f9 → #e1e1e1) creating a containerized look
+- Soft 4px roundedness reflecting cloud service modularity
+- Minimalist foundation with tactile accents—whitespace with subtle depth via tonal layering and sharp borders
 - A single fixed light theme — Azurdle does not follow the visitor's OS/browser dark-mode preference
 
 ## 2. Colors
 
-Azure Blue is the whole brand; Success Green is held in reserve for the single celebratory moment in the whole experience.
+The palette is derived from Azure's core identity, expanded for game state feedback. Depth comes from borders and outlines, not tonal backgrounds—a "flat-plus" aesthetic maintaining architectural precision.
 
 ### Primary
-- **Azure Blue** (`oklch(0.568 0.167 251.3)` / `#0078D4`): The brand color. Used on the top bar, the primary "Guess" button, the clue-number badges, and any active/focused state.
+- **Azure Blue Deep** (`#005faa`): Default primary color for interactive elements, focus states, and visual anchors.
+- **Azure Blue** (`#0078d4`): Brand container, top bar, and active/hover lift.
+- **Azure Blue Hover** (`#004883`): Pressed/active state—same hue, pulled darker for tactile feedback.
 
 ### Secondary
-- **Azure Blue Dark** (`oklch(0.461 0.132 250.3)` / `#005A9E`): Hover/active state for Azure Blue. Same hue, pulled darker.
+- **Navy** (`#465e90`): Typography grounding; secondary branding where not primary.
 
-### Tertiary
-- **Success Green** (`oklch(0.51 0.165 142.7)` / `#107C10`): Reserved exclusively for the "correct guess" celebration banner. Never used for anything else.
+### Tertiary (State Feedback)
+- **Success Green** (`#107c10`): The "correct guess" celebration banner. Reserved exclusively for success states.
+- **Warning Gold** (`#ffb900`): Partial matches—correct category/model type but wrong service.
+- **Error Red** (`#d83b01`): Incorrect guesses, failed states.
 
-### Neutral
-- **Paper** (`oklch(1 0 0)` / `#ffffff`): Card and content background. Pure white.
-- **Fluent Grey** (`oklch(0.983 0.002 67.8)` / `#FAF9F8`): Page background behind the card, warm-neutral in the Fluent tradition (not blue-tinted).
-- **Ink** (`oklch(0.24 0.002 67.7)` / `#201F1E`): Body text, clue text.
-- **Muted Ink** (`oklch(0.483 0.004 67.7)` / `#605E5C`): Secondary text — guess history chips, metadata line.
-- **Border** (`oklch(0.905 0.003 67.8)` / `#E1DFDD`): The stroke around every card, input, and chip — this system's depth comes from borders + shadow, not tonal fills.
+### Neutral Scale
+- **Paper** (`#ffffff`): Card and content background. Pure white.
+- **Surface** (`#f9f9f9`): Page background, Cloud Log panel background.
+- **Surface Border** (`#f3f3f3`): Subtle container dividers.
+- **Border** (`#e1e1e1`): Primary stroke around cards, inputs, and chips—tonal lift via 1px border + shadow, not fill.
+- **Ink** (`#1a1c1c`): Body text, clue text, high-contrast content.
+- **Muted Ink** (`#404752`): Secondary text, Cloud Log metadata, status indicators.
+
+### Attribute Grid States
+- **Hit** (`#107c10` on white): Exact match — service attribute matches answer.
+- **Close** (`#ffb900` on dark): Partial match — year close or model type similar.
+- **Miss** (`#d83b01` on white): No match — attribute differs significantly.
 
 ### Named Rules
 **The One Theme Rule.** Azurdle ships one fixed light theme. It does not read or follow `prefers-color-scheme`.
 
-**The One Flash Rule.** Success Green appears exactly once in the whole experience: the moment a guess is correct.
+**The Success Green Rule.** Success Green (`#107c10`) appears exactly once in the whole experience: the moment a guess is correct. Never for warnings or partial states.
 
-**The Same-Hue Interaction Rule.** Every hover/active/focus state on a colored element stays within the same hue, moving only in lightness (Azure Blue → Azure Blue Dark).
+**The Outline-First Rule.** Depth comes from 1px borders and soft shadows (`--shadow-card`), never from tonal-surface fills. Every card reads as a lifted object on the neutral background, not a step down into depth.
+
+**The Same-Hue Interaction Rule.** Every hover/active/focus state on a colored element stays within the same hue, moving only in darkness (Azure Blue → Azure Blue Dark).
 
 ## 3. Typography
 
-**Body Font:** Segoe UI (with Geist / `system-ui, sans-serif` fallback) — the Fluent/Portal system font.
-**Label/Mono Font:** Geist Mono (with `ui-monospace, monospace` fallback), for the puzzle number and share-text square row only.
+**Body Font:** Space Grotesk (with Geist / `system-ui, sans-serif` fallback) — modern, sharp, high-legibility sans for contemporary "tech" feel.
+**Label/Mono Font:** IBM Plex Mono (with Geist Mono / `ui-monospace, monospace` fallback) for technical metadata, Cloud Log entries, and numerical data.
 
-**Character:** A neutral system sans that reads as "in-product tool," not a marketing typeface. Geist Mono still carries fixed-width numerals (puzzle numbering, share-result squares) — a Fluent surface can still use a mono accent for data.
+**Character:** Space Grotesk reads as contemporary and purposeful—not a marketing font, but a developer-centric aesthetic. IBM Plex Mono carries fixed-width precision for puzzle numbers, timestamps, and technical tags (Category, Year, Pricing) — reinforcing the "Cloud Log" data-driven theme.
 
 ### Hierarchy
-- **Display** (600, `clamp(1.75rem, 4vw, 2.25rem)`, 1.15): The "Azurdle" wordmark / page title only.
-- **Title** (600, 20px, 1.3): Puzzle meta line and modal headings.
-- **Body** (400, 16px, 1.5): Clue text, guess results, all prose.
-- **Label** (600, 13px, 1.3, tracking `0.02em`): Form labels, guess-count indicator, button text.
-- **Mono** (500, 14px, 1.4): Puzzle number badge, share-text square row.
-- **Countdown** (600, 28px, 1.2, mono): The "next puzzle in" clock after a game ends.
-- **Micro-badge** (600, 11px, 1.2, tracking `0.02em`): The "Soon" tag on disabled coming-soon affordances.
+- **Display** (700, 40px, 1.2, -0.01em): The "Azurdle #X" puzzle title and service name.
+- **Headline** (600, 24px, 1.33): Category, section headers, modal titles.
+- **Title** (700, 16px, 1.3, -0.01em): Puzzle meta line, key information headers.
+- **Body** (400, 16px, 1.5): Clue text, guess results, all prose content.
+- **Label** (600, 13px, 1.3, tracking `0.02em`): Form labels, button text, status indicators.
+- **Mono** (500, 13px, 1.23, tracking `0.05em`): Cloud Log entries, Cloud Log metadata, technical tags.
+- **Stat Mono** (700, 32px, 1.25): Large timer and statistics numbers.
+- **Micro-badge** (600, 11px, 1.2, tracking `0.06em`): Attribute tags, category chips, year badges.
 
 ## 4. Elevation
 

@@ -9,38 +9,41 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <div className={styles.topbar}>
-        <Image
-          src="/logo/azurdle-icon.png"
-          alt=""
-          width={22}
-          height={14}
-          priority
-          className={styles.topbarIcon}
-        />
-        <span className={styles.topbarTitle}>Azurdle</span>
+        <div className={styles.topbarBrand}>
+          <Image
+            src="/logo/azurdle-icon.png"
+            alt=""
+            width={22}
+            height={14}
+            priority
+            className={styles.topbarIcon}
+          />
+          <span className={styles.topbarTitle}>Azurdle</span>
+        </div>
+        <span className={styles.topbarDivider} aria-hidden="true" />
+        <span className={styles.topbarBadge}>Cloudshell: Live</span>
+        <div className={styles.topbarRight}>
+          <ComingSoonNav />
+          <HowToPlay />
+          <AuthButton />
+        </div>
       </div>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <div className={styles.wordmark}>
-            <Image
-              src="/logo/azurdle-icon.png"
-              alt=""
-              width={24}
-              height={16}
-              priority
-              className={styles.wordmarkIcon}
-            />
-            <span className={styles.wordmarkTitle}>Azurdle</span>
-            <span className={styles.wordmarkSub}>Guess today&apos;s Azure service in 5 clues</span>
-          </div>
-          <div className={styles.headerRight}>
-            <ComingSoonNav />
-            <HowToPlay />
-            <AuthButton />
-          </div>
-        </div>
         <GameBoard />
       </main>
+      <footer className={styles.footer}>
+        <div className={styles.footerBrand}>
+          <span className={styles.footerTitle}>Azurdle</span>
+          <span>Elevating Azure knowledge through daily puzzles.</span>
+        </div>
+        <nav className={styles.footerLinks} aria-label="Footer">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Support</a>
+          <a href="#">GitHub ↗</a>
+        </nav>
+        <span className={styles.copyright}>© 2024 Cloud Labs Inc.</span>
+      </footer>
     </div>
   );
 }

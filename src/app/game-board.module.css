@@ -1,178 +1,74 @@
 .board {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 28px;
   width: 100%;
-  min-height: 0;
-  flex: 1;
 }
 
-.columns {
-  display: flex;
-  gap: var(--space-md);
-  min-height: 0;
-  flex: 1;
+.boardHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 24px;
 }
 
-.leftCol {
-  display: flex;
-  flex-direction: column;
-  flex: 55;
-  min-height: 0;
-}
-
-.clueScroll {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-right: 2px;
-  margin-right: -2px;
-}
-
-.rightCol {
-  flex: 45;
-  overflow-y: auto;
-  min-height: 0;
-  border-left: 1px solid var(--border);
-  padding-left: var(--space-md);
-  /* Subtle tint so the guess log reads as a distinct panel */
-  background: var(--surface);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
-  margin-right: calc(-1 * var(--space-lg));
-  margin-top: calc(-1 * var(--space-md));
-  margin-bottom: calc(-1 * var(--space-md));
-}
-
-.logEmpty {
-  font-size: 12px;
-  color: var(--muted);
-  font-style: italic;
-  margin-top: var(--space-lg);
-  text-align: center;
-  line-height: 1.6;
-  padding: 0 var(--space-sm);
-}
-
-@media (max-width: 680px) {
-  .columns {
-    flex-direction: column;
-  }
-  .rightCol {
-    border-left: none;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-    margin-right: calc(-1 * var(--space-md));
-    margin-top: 0;
-    padding: var(--space-sm) var(--space-md);
-    border-top: 1px solid var(--border);
-  }
-}
-
-.guessBar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  flex-shrink: 0;
-  /* .board's own flex gap already spaces this from .scrollArea; the
-     border alone marks the boundary so scrolled clues don't read as
-     disconnected from the guess bar below them. */
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--border);
-}
-
-.status {
-  font-size: 16px;
-  color: var(--muted);
-}
-
-/* Matches the shape of .meta + two .clue rows so the loading state doesn't
-   jump when real content swaps in. */
-.skeletonLine,
-.skeletonClue {
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  animation: skeletonPulse 1.4s ease-in-out infinite;
-}
-
-.skeletonMeta {
-  width: 96px;
-  height: 14px;
-  border-radius: var(--radius-sm);
-}
-
-.skeletonClue {
-  height: 64px;
-}
-
-@keyframes skeletonPulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.errorState {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  font-size: 16px;
-  color: var(--muted);
-}
-
-.retryButton {
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: none;
+.title {
   color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: background-color 150ms ease-out;
+  font-size: clamp(38px, 4.2vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
 }
 
-.retryButton:hover {
-  background: var(--surface);
+.title::after {
+  content: "";
+  display: block;
+  width: 104px;
+  height: 4px;
+  margin-top: 16px;
+  border-radius: 99px;
+  background: var(--primary);
 }
 
-.retryButton:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.title span {
+  color: var(--primary);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .skeletonLine,
-  .skeletonClue {
-    animation: none;
-  }
-}
-
-.meta {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--muted);
+.session {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 18px;
+  color: #24272d;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .timer {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  color: var(--muted);
+  color: #24272d;
+  font-variant-numeric: tabular-nums;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.9fr);
+  gap: 42px;
+  align-items: start;
+}
+
+.leftCol,
+.clueScroll,
+.cloudLog {
+  min-width: 0;
 }
 
 .clueList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 16px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -180,26 +76,74 @@
 
 .clue {
   position: relative;
-  display: flex;
-  gap: var(--space-sm);
-  align-items: flex-start;
-  padding: 14px var(--space-md);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--ink);
-  font-size: 15px;
-  line-height: 1.5;
-  /* Each clue mounts once (stable key) and never re-renders after, so this
-     only plays the moment a wrong guess reveals it — the clue ladder is the
-     plot, and each rung should visibly arrive. */
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  color: #343b49;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.58;
   animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Marks "this clue just arrived because that guess missed" — a brief
-   Azure-Blue border pulse that settles back to the resting border, layered
-   on top of the clueReveal fade. Stays in-hue (no red/amber) per DESIGN.md:
-   a miss is information, not an alarm. */
+.clue:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: -17px;
+  left: 27px;
+  width: 0;
+  height: 18px;
+  border-left: 2px dashed #cbd5e4;
+}
+
+.clue:not(:last-child) .clueNumber::after {
+  content: "";
+  position: absolute;
+  top: 54px;
+  left: 27px;
+  width: 0;
+  height: 16px;
+  border-left: 2px dashed #cbd5e4;
+}
+
+.clueNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border: 1px solid #cbd5e4;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #343b49;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgb(15 23 42 / 0.03);
+}
+
+.clueText {
+  min-width: 0;
+  min-height: 112px;
+  padding: 28px 28px;
+  border: 1px solid #cbd5e4;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.clueBonus {
+  opacity: 0.62;
+  font-style: italic;
+}
+
+.clueNumberBonus {
+  color: #6f7785;
+  background: #f4f6f9;
+}
+
 .clueMissReveal {
   animation:
     clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -208,153 +152,45 @@
 
 @keyframes missHighlight {
   0% {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px oklch(0.568 0.167 251.3 / 0.15);
+    filter: drop-shadow(0 0 0 rgb(0 95 170 / 0));
+  }
+  30% {
+    filter: drop-shadow(0 0 10px rgb(0 95 170 / 0.18));
   }
   100% {
-    border-color: var(--border);
-    box-shadow: none;
+    filter: drop-shadow(0 0 0 rgb(0 95 170 / 0));
   }
 }
 
-/* A dashed pipeline tick through the gap above each clue after the first —
-   reads as a dependency chain between ladder rungs, echoing an
-   architecture-diagram connector without touching Microsoft's own palette. */
-.clue:not(:first-child)::before {
-  content: "";
-  position: absolute;
-  top: calc(-1 * var(--space-sm));
-  left: 28px;
-  width: 0;
-  height: var(--space-sm);
-  border-left: 2px dashed var(--border);
-}
-
-.clueNumber {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  margin-top: 2px;
-  border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #fff;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
-}
-
-/* A clue shown for context after the game ends, past the point the player
-   actually reached — dimmed and set apart from the clues that were live. */
-.clueBonus {
-  opacity: 0.6;
-  font-style: italic;
-}
-
-.clueNumberBonus {
-  background: var(--muted);
-}
-
-.cloudLog {
+.guessBar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  height: 100%;
-}
-
-.cloudLogLabel {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding-bottom: var(--space-xs);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: var(--space-xs);
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-}
-
-.guessList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Guess without attribute grid — full-width row. */
-.guessItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Guess with attribute grid — column container: [row] [grid]. */
-.guessItemWithGrid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* The name row inside a guessItemWithGrid. */
-.guessItemPill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.guessItemIcon {
-  color: var(--muted);
-  flex-shrink: 0;
+  gap: 20px;
+  margin-top: 32px;
+  padding-left: 78px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 14px;
 }
 
 .label {
+  color: #4b5564;
+  font-family: var(--font-mono);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .inputRow {
   display: flex;
-  gap: var(--space-sm);
+  align-items: stretch;
+  gap: 14px;
 }
 
-/* A miss is information, not an alarm (per DESIGN.md) — this is a small
-   horizontal jitter, not a red flash, and never fires on a correct guess. */
 .inputRowShake {
   animation: inputShake 320ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
@@ -381,29 +217,42 @@
 
 .input {
   flex: 1;
-  padding: 12px 14px 12px 40px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  font-size: 16px;
+  width: 100%;
+  min-width: 0;
+  height: 64px;
+  padding: 0 20px 0 56px;
+  border: 1px solid #b8c5d9;
+  border-radius: 8px;
+  background: #f8f8f8;
   color: var(--ink);
-  background: var(--bg);
-  transition: border-color 150ms ease-out;
+  font-size: 18px;
+  font-weight: 700;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.input::placeholder {
+  color: #6f7785;
+  opacity: 1;
 }
 
 .input:focus-visible {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(0 95 170 / 0.14);
 }
 
 .button {
-  padding: 12px 22px;
-  border-radius: var(--radius-md);
+  min-width: 112px;
+  min-height: 64px;
+  padding: 0 20px;
   border: none;
-  background: var(--primary);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  border-radius: 8px;
+  background: #0078d4;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: background-color 150ms ease-out, transform 100ms ease-out;
 }
@@ -413,10 +262,12 @@
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
-.button:focus-visible {
+.button:focus-visible,
+.shareButton:focus-visible,
+.retryButton:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -426,26 +277,325 @@
   cursor: not-allowed;
 }
 
-.resultBanner {
+.statusMessage {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: 14px var(--space-md);
-  border-radius: var(--radius-md);
+  gap: 10px;
+  min-height: 22px;
+  color: #d31e25;
   font-size: 16px;
-  font-weight: 600;
-  color: var(--ink);
+  font-weight: 500;
+}
+
+.statusMessage:not(:empty)::before {
+  content: "i";
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rightCol {
+  position: sticky;
+  top: 28px;
+}
+
+.cloudLog {
+  overflow: hidden;
+  border: 1px solid #cbd5e4;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.cloudLogLabel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 80px;
+  padding: 0 22px;
+  border-bottom: 1px solid #cbd5e4;
+  background: #f8f8f8;
+  color: #1f2228;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cloudLogLabel svg {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #dcecfb;
+  color: var(--primary);
+}
+
+.liveFeed {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #e3f3e6;
+  color: #17851c;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+.liveFeed::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+.guessList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guessItem,
+.guessItemWithGrid {
+  padding: 24px 22px 18px;
+  border-bottom: 1px solid #e9edf4;
+  animation: clueReveal 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.guessItem:last-child,
+.guessItemWithGrid:last-child {
+  border-bottom: 0;
+}
+
+.guessItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #3d4450;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.guessItemWithGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guessItemPill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #3d4450;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.guessItemCorrect {
+  background: #f4fbf5;
+  border-left: 5px solid #168914;
+}
+
+.guessItemCorrect .guessItemPill {
+  color: #168914;
+}
+
+.guessItemIcon {
+  flex-shrink: 0;
+  color: #d31e25;
+}
+
+.logEmpty {
+  min-height: 240px;
+  padding: 96px 24px;
+  color: #6f7785;
+  text-align: center;
+}
+
+.resultBanner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 144px;
+  justify-content: center;
+  padding: 28px 170px 28px 128px;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.35;
   animation: reveal 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.resultBanner::before {
+  content: "▱";
+  position: absolute;
+  left: 36px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.26);
+  font-size: 46px;
+  transform: translateY(-50%) rotate(-15deg);
+}
+
+.resultBanner::after {
+  content: "✓";
+  position: absolute;
+  right: -7px;
+  top: -32px;
+  width: 116px;
+  height: 116px;
+  border: 14px solid rgb(255 255 255 / 0.18);
+  border-radius: 50%;
+  color: rgb(255 255 255 / 0.18);
+  font-size: 105px;
+  line-height: 100px;
+  text-align: center;
+}
+
 .resultBannerWin {
-  background: var(--accent-wash);
-  color: var(--accent-ink);
+  background: linear-gradient(90deg, #168914, #00820a);
 }
 
 .resultBannerLoss {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: linear-gradient(90deg, #3d4450, #252a32);
+}
+
+.afterGamePanel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 26px 26px;
+  border: 1px solid #cbd5e4;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.72);
+}
+
+.afterGamePanel > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.shareButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 0 34px;
+  border: 1px solid #bfcadc;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.shareButton:hover {
+  border-color: var(--primary);
+  background: #f7fbff;
+}
+
+.shareButtonCopied {
+  border-color: #168914;
+  color: #168914;
+}
+
+.skeletonLine,
+.skeletonClue {
+  border-radius: 8px;
+  background: #ffffff;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonMeta {
+  width: 240px;
+  height: 58px;
+}
+
+.skeletonClue {
+  height: 112px;
+}
+
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 560px;
+  padding: 28px;
+  border: 1px solid #cbd5e4;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #4b5564;
+  font-size: 16px;
+}
+
+.retryButton {
+  padding: 10px 18px;
+  border: 1px solid #bfcadc;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  background: #f7fbff;
 }
 
 @keyframes reveal {
@@ -470,48 +620,124 @@
   }
 }
 
-.shareButton {
-  align-self: flex-start;
-  padding: 10px 18px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: none;
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  cursor: pointer;
+@media (max-width: 980px) {
+  .boardHeader,
+  .columns,
+  .afterGamePanel {
+    grid-template-columns: 1fr;
+  }
+
+  .session {
+    padding-bottom: 0;
+  }
+
+  .rightCol {
+    position: static;
+  }
+
+  .shareButton {
+    width: 100%;
+  }
 }
 
-.shareButton:hover {
-  background: var(--surface);
-}
+@media (max-width: 620px) {
+  .board {
+    gap: 22px;
+  }
 
-.shareButton:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
+  .title {
+    font-size: 34px;
+  }
 
-.shareButtonCopied {
-  border-color: var(--primary);
-  color: var(--primary);
-}
+  .columns {
+    gap: 28px;
+  }
 
-.statusMessage {
-  min-height: 20px;
-  font-size: 14px;
-  color: var(--muted);
+  .clue {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 12px;
+    font-size: 15px;
+  }
+
+  .clueNumber {
+    width: 46px;
+    height: 46px;
+  }
+
+  .clue:not(:first-child)::before {
+    left: 23px;
+  }
+
+  .clue:not(:last-child) .clueNumber::after {
+    top: 46px;
+    left: 23px;
+  }
+
+  .clueText {
+    min-height: 96px;
+    padding: 18px;
+  }
+
+  .guessBar {
+    padding-left: 0;
+  }
+
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .input {
+    height: 56px;
+    padding-left: 48px;
+    font-size: 16px;
+  }
+
+  .button {
+    min-width: 100%;
+    min-height: 50px;
+  }
+
+  .statusMessage {
+    font-size: 15px;
+  }
+
+  .cloudLogLabel {
+    min-height: 68px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .resultBanner {
+    min-height: 132px;
+    padding: 24px 28px 24px 92px;
+    font-size: 18px;
+  }
+
+  .resultBanner::before {
+    left: 20px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .resultBanner::after {
+    display: none;
+  }
+
+  .afterGamePanel {
+    padding: 20px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .input,
-  .button,
+  .skeletonLine,
+  .skeletonClue,
   .clue,
   .clueMissReveal,
   .guessItem,
   .guessItemWithGrid,
   .inputRowShake,
-  .resultBanner {
+  .resultBanner,
+  .liveFeed {
     transition: none;
     animation: none;
   }
