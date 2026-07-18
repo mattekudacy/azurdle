@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getTodayPuzzle } from "@/lib/today-puzzle";
 import { createClient } from "@/lib/supabase/server";
 import { getAttempt } from "@/lib/attempts";
+import { getServiceInfo } from "@/lib/service-info";
 
 const MAX_GUESSES = 5;
 
@@ -31,6 +32,7 @@ export async function GET() {
   }
 
   const gameOver = solved || guesses.length >= MAX_GUESSES;
+  const answerMeta = gameOver ? getServiceInfo(puzzle.answer) : undefined;
 
   return NextResponse.json({
     date: puzzle.date,
@@ -47,6 +49,9 @@ export async function GET() {
       gameOver: true,
       answer: puzzle.answer,
       cluesRevealed,
+      answerDescription: answerMeta?.description,
+      answerUrl: answerMeta?.url,
+      answerDocLinks: answerMeta?.documentation_links,
     }),
   });
 }

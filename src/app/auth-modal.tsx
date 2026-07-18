@@ -8,12 +8,14 @@ import styles from "./auth-modal.module.css";
 type Props = {
   open: boolean;
   onClose: () => void;
+  nudgeMessage?: string;
+  variant?: "win" | "loss" | "default";
 };
 
 type EmailMode = "signin" | "signup";
 type Step = "choose" | "email";
 
-export default function AuthModal({ open, onClose }: Props) {
+export default function AuthModal({ open, onClose, nudgeMessage, variant = "default" }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [step, setStep] = useState<Step>("choose");
   const [emailMode, setEmailMode] = useState<EmailMode>("signin");
@@ -94,23 +96,43 @@ export default function AuthModal({ open, onClose }: Props) {
     }
   }
 
+  const dialogClass = [
+    styles.dialog,
+    variant === "win" ? styles.dialogWin : variant === "loss" ? styles.dialogLoss : "",
+  ].filter(Boolean).join(" ");
+
   return (
     <dialog
       ref={dialogRef}
-      className={styles.dialog}
+      className={dialogClass}
       aria-labelledby="auth-modal-title"
       onClick={handleBackdropClick}
     >
-      <div className={styles.header}>
-        <h2 id="auth-modal-title" className={styles.title}>Sign in to Azurdle</h2>
-        <button type="button" aria-label="Close" className={styles.close} onClick={onClose}>
-          <CloseIcon />
-        </button>
-      </div>
+      {variant !== "default" && step === "choose" ? (
+        <div className={variant === "win" ? styles.heroBannerWin : styles.heroBannerLoss}>
+          <div className={styles.heroEmoji}>{variant === "win" ? "🏆" : "☁️"}</div>
+          <h2 id="auth-modal-title" className={styles.heroTitle}>
+            {variant === "win" ? "You nailed it!" : "Better luck tomorrow"}
+          </h2>
+          {nudgeMessage && <p className={styles.heroSub}>{nudgeMessage}</p>}
+          <button type="button" aria-label="Close" className={styles.heroClose} onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+      ) : (
+        <div className={styles.header}>
+          <h2 id="auth-modal-title" className={styles.title}>Sign in to Azurdle</h2>
+          <button type="button" aria-label="Close" className={styles.close} onClick={onClose}>
+            <CloseIcon />
+          </button>
+        </div>
+      )}
 
       {step === "choose" && (
         <div className={styles.body}>
-          <p className={styles.subtitle}>Track your streak, view stats, and access the archive.</p>
+          {variant === "default" && (
+            <p className={styles.subtitle}>{nudgeMessage ?? "Track your streak, view stats, and access the archive."}</p>
+          )}
           <div className={styles.oauthGroup}>
             <button type="button" className={styles.oauthButton} onClick={() => signInWithOAuth("github")}>
               <GitHubIcon />

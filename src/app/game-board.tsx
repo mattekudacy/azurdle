@@ -11,6 +11,7 @@ import { normalizeGuess } from "@/lib/guess";
 import type { AttributeComparison } from "@/lib/attribute-comparison";
 import AttributeGrid from "./attribute-grid";
 import AuthModal from "./auth-modal";
+import Confetti from "./confetti";
 import { createClient } from "@/lib/supabase/client";
 
 const MAX_GUESSES = 5;
@@ -68,6 +69,9 @@ type TodayPuzzle = {
   solved?: boolean;
   answer?: string;
   cluesRevealed?: number;
+  answerDescription?: string;
+  answerUrl?: string;
+  answerDocLinks?: string[];
 };
 
 type GuessResponse = {
@@ -76,6 +80,9 @@ type GuessResponse = {
   nextClue?: string;
   answer?: string;
   allClues?: string[];
+  answerDescription?: string;
+  answerUrl?: string;
+  answerDocLinks?: string[];
   error?: string;
   attributeComparison?: AttributeComparison;
 };
@@ -98,6 +105,8 @@ export default function GameBoard() {
   const [elapsed, setElapsed] = useState(0);
   const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [confettiActive, setConfettiActive] = useState(false);
+  const nudgeFiredRef = useRef(false);
   // Index of the clue that just arrived because of a miss — drives a
   // one-time highlight on that clue only, distinct from the fade-in every
   // clue gets on mount. Cleared after the highlight animation finishes.
@@ -162,6 +171,26 @@ export default function GameBoard() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fire confetti on win (all users), open auth nudge modal for guests.
+  // nudgeFiredRef prevents re-firing on metadata-merge re-renders.
+  useEffect(() => {
+    if (!progress?.gameOver) return;
+    if (isSignedIn === null) return; // wait until auth state is known
+    if (nudgeFiredRef.current) return;
+    nudgeFiredRef.current = true;
+
+    if (progress.solved) {
+      setConfettiActive(true);
+      setTimeout(() => setConfettiActive(false), 5000);
+    }
+
+    if (isSignedIn === false) {
+      const delay = progress.solved ? 1800 : 1200;
+      const id = setTimeout(() => setAuthModalOpen(true), delay);
+      return () => clearTimeout(id);
+    }
+  }, [progress?.gameOver, progress?.solved, isSignedIn]);
+
   // Dev-only: ?reset clears today's local progress + the HttpOnly anon cookie
   // so you can replay the same puzzle without touching DevTools. No-op in prod.
   useEffect(() => {
@@ -190,7 +219,32 @@ export default function GameBoard() {
         setPuzzle(data);
         const local = getLocalProgress(data.date);
         if (local) {
-          setProgress(local);
+          // Merge metadata from the server's today response when it's present
+          // (signed-in users whose attempt is known server-side).
+          const merged: LocalProgress = {
+            ...local,
+            answerDescription: local.answerDescription ?? data.answerDescription,
+            answerUrl: local.answerUrl ?? data.answerUrl,
+            answerDocLinks: local.answerDocLinks ?? data.answerDocLinks,
+          };
+          setProgress(merged);
+          // For guests whose completed game lives only in localStorage, the
+          // server doesn't know they finished so it returns no metadata.
+          // Fetch it directly by answer name when it's still missing.
+          if (merged.gameOver && merged.answer && !merged.answerDescription) {
+            fetch(`/api/service-info?name=${encodeURIComponent(merged.answer)}`)
+              .then((r) => r.ok ? r.json() : null)
+              .then((info) => {
+                if (!info) return;
+                setProgress((prev) => prev ? {
+                  ...prev,
+                  answerDescription: info.description,
+                  answerUrl: info.url,
+                  answerDocLinks: info.documentation_links,
+                } : prev);
+              })
+              .catch(() => {/* non-fatal */});
+          }
         } else if (data.gameOver) {
           // Signed-in user has already completed this puzzle on another
           // device — server told us so. Hydrate progress from the server
@@ -203,6 +257,9 @@ export default function GameBoard() {
             solved: data.solved ?? false,
             gameOver: true,
             answer: data.answer,
+            answerDescription: data.answerDescription,
+            answerUrl: data.answerUrl,
+            answerDocLinks: data.answerDocLinks,
             completedAt: null,
           });
         } else {
@@ -265,6 +322,9 @@ export default function GameBoard() {
         solved: data.correct,
         gameOver: data.gameOver,
         answer: data.answer,
+        answerDescription: data.answerDescription,
+        answerUrl: data.answerUrl,
+        answerDocLinks: data.answerDocLinks,
         completedAt: data.gameOver ? new Date().toISOString() : null,
         startedAt,
         elapsedSeconds: data.gameOver ? currentElapsed : undefined,
@@ -411,19 +471,56 @@ export default function GameBoard() {
                 </div>
               </form>
             ) : (
-              <>
-                <p
-                  role="status"
-                  aria-live="polite"
-                  className={`${styles.resultBanner} ${
-                    progress.solved ? styles.resultBannerWin : styles.resultBannerLoss
-                  }`}
-                >
+              <div
+                role="status"
+                aria-live="polite"
+                className={`${styles.resultBanner} ${
+                  progress.solved ? styles.resultBannerWin : styles.resultBannerLoss
+                }`}
+              >
+                <p className={styles.resultBannerHeadline}>
                   {progress.solved
-                    ? `Solved on clue ${revealedDuringPlay}! The answer was ${progress.answer}.`
-                    : `Out of guesses. The answer was ${progress.answer}.`}
+                    ? `Solved on clue ${revealedDuringPlay}!`
+                    : `Out of guesses.`}
                 </p>
-              </>
+                <p className={styles.resultBannerAnswer}>
+                  The answer was <strong>{progress.answer}</strong>.
+                </p>
+                {progress.answerDescription && (
+                  <p className={styles.resultBannerDesc}>{progress.answerDescription}</p>
+                )}
+                {(progress.answerUrl || progress.answerDocLinks?.length) && (
+                  <div className={styles.resultBannerLinks}>
+                    {progress.answerUrl && (
+                      <a
+                        href={progress.answerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.resultBannerLink}
+                      >
+                        Microsoft Learn →
+                      </a>
+                    )}
+                    {progress.answerDocLinks?.map((link, i) => {
+                      const slug = link.split("/").filter(Boolean).pop() ?? "";
+                      const label = slug
+                        ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                        : `Reference ${i + 1}`;
+                      return (
+                        <a
+                          key={i}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.resultBannerLink}
+                        >
+                          {label} →
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
 
             {progress.gameOver && (
@@ -443,23 +540,19 @@ export default function GameBoard() {
               </div>
             )}
 
-            {progress.gameOver && isSignedIn === false && (
-              <div className={styles.signUpNudge}>
-                <p className={styles.signUpNudgeText}>
-                  {progress.solved
-                    ? "Nice work! Sign in to track your streak and appear on the leaderboard."
-                    : "Keep at it — sign in to save your progress and track improvement over time."}
-                </p>
-                <button
-                  type="button"
-                  className={styles.signUpNudgeButton}
-                  onClick={() => setAuthModalOpen(true)}
-                >
-                  Sign in / Create account
-                </button>
-              </div>
-            )}
-            <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+            <AuthModal
+              open={authModalOpen}
+              onClose={() => setAuthModalOpen(false)}
+              variant={progress?.gameOver ? (progress.solved ? "win" : "loss") : "default"}
+              nudgeMessage={
+                progress?.gameOver
+                  ? progress.solved
+                    ? "Sign in to track your streak and appear on the leaderboard."
+                    : "Sign in to save your progress and track your improvement over time."
+                  : undefined
+              }
+            />
+            <Confetti active={confettiActive} />
 
             {!progress.gameOver && (
               <p role="status" aria-live="polite" className={styles.statusMessage}>

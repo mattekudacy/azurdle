@@ -24,6 +24,9 @@ export type LocalProgress = {
   solved: boolean;
   gameOver: boolean;
   answer?: string;
+  answerDescription?: string;
+  answerUrl?: string;
+  answerDocLinks?: string[];
   completedAt: string | null;
   // ISO timestamp of the first guess — used to compute elapsed play time.
   startedAt?: string;

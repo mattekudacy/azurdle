@@ -181,6 +181,57 @@
             "https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview",
             "https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-technical-overview"
           ]
+        },
+        {
+          "name": "Azure Dedicated Hosts",
+          "slug": "dedicated-hosts",
+          "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/dedicated-hosts",
+          "description": "Physical servers dedicated to a single Azure subscription, providing hardware isolation and control over VM placement for compliance and licensing needs.",
+          "icon": null,
+          "tags": [
+            "IaaS",
+            "compute",
+            "dedicated",
+            "compliance"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/dedicated-hosts-overview"
+          ]
+        },
+        {
+          "name": "Azure Virtual Desktop",
+          "slug": "virtual-desktop",
+          "url": "https://learn.microsoft.com/en-us/azure/virtual-desktop/",
+          "description": "Cloud-based desktop and app virtualization service that runs on Azure, delivering full Windows desktops and apps to any device.",
+          "icon": null,
+          "tags": [
+            "SaaS",
+            "desktop",
+            "VDI",
+            "remote-work"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/virtual-desktop/overview"
+          ]
+        },
+        {
+          "name": "Azure CycleCloud",
+          "slug": "cyclecloud",
+          "url": "https://learn.microsoft.com/en-us/azure/cyclecloud/",
+          "description": "HPC cluster orchestration and management tool that provisions, manages, and scales high-performance computing environments on Azure.",
+          "icon": null,
+          "tags": [
+            "PaaS",
+            "HPC",
+            "cluster",
+            "compute"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/cyclecloud/overview"
+          ]
         }
       ]
     },
@@ -269,6 +320,57 @@
           "pricing_model": "Capacity-based pricing",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/azure-netapp-files/azure-netapp-files-introduction"
+          ]
+        },
+        {
+          "name": "Azure Managed Disks",
+          "slug": "managed-disks",
+          "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/managed-disks-overview",
+          "description": "Block-level storage volumes managed by Azure for use with virtual machines, offering high availability and durable disk storage with multiple performance tiers.",
+          "icon": null,
+          "tags": [
+            "IaaS",
+            "storage",
+            "block-storage",
+            "VM"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types"
+          ]
+        },
+        {
+          "name": "Azure Ultra Disk Storage",
+          "slug": "ultra-disk",
+          "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types#ultra-disks",
+          "description": "Highest-performance Azure disk storage tier offering sub-millisecond latency and high IOPS for mission-critical, IO-intensive workloads like SAP HANA and top-tier databases.",
+          "icon": null,
+          "tags": [
+            "IaaS",
+            "storage",
+            "high-performance",
+            "block-storage"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-ultra-ssd"
+          ]
+        },
+        {
+          "name": "Azure HPC Cache",
+          "slug": "hpc-cache",
+          "url": "https://learn.microsoft.com/en-us/azure/hpc-cache/",
+          "description": "NFS file caching service that accelerates access to on-premises or Azure Blob Storage data for high-performance computing workloads, reducing latency and improving throughput.",
+          "icon": null,
+          "tags": [
+            "storage",
+            "HPC",
+            "caching",
+            "NFS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/hpc-cache/hpc-cache-overview"
           ]
         }
       ]
@@ -363,6 +465,57 @@
           "pricing_model": "C/P tier pricing",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-overview"
+          ]
+        },
+        {
+          "name": "Azure Database for MySQL",
+          "slug": "database-for-mysql",
+          "url": "https://learn.microsoft.com/en-us/azure/mysql/",
+          "description": "Fully managed, scalable MySQL relational database service with built-in high availability, automated backups, and security, powered by the MySQL community edition.",
+          "icon": null,
+          "tags": [
+            "PaaS",
+            "relational",
+            "MySQL",
+            "database"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/overview"
+          ]
+        },
+        {
+          "name": "Azure Database for MariaDB",
+          "slug": "database-for-mariadb",
+          "url": "https://learn.microsoft.com/en-us/azure/mariadb/",
+          "description": "Fully managed relational database service based on the open-source MariaDB engine, offering high availability, automated backups, and enterprise-grade security.",
+          "icon": null,
+          "tags": [
+            "PaaS",
+            "relational",
+            "MariaDB",
+            "database"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/mariadb/overview"
+          ]
+        },
+        {
+          "name": "Azure Table Storage",
+          "slug": "table-storage",
+          "url": "https://learn.microsoft.com/en-us/azure/storage/tables/",
+          "description": "NoSQL key-value store for storing large amounts of semi-structured data, offering schemaless design, massive scale, and low-cost data access.",
+          "icon": null,
+          "tags": [
+            "NoSQL",
+            "key-value",
+            "storage",
+            "schemaless"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview"
           ]
         }
       ]
@@ -585,6 +738,108 @@
           "pricing_model": "Standard/Premium pricing",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/ddos-protection/ddos-protection-overview"
+          ]
+        },
+        {
+          "name": "Azure Virtual WAN",
+          "slug": "virtual-wan",
+          "url": "https://learn.microsoft.com/en-us/azure/virtual-wan/",
+          "description": "Managed networking service that unifies networking, security, and routing into a single operational hub, providing optimized branch-to-Azure and branch-to-branch connectivity.",
+          "icon": null,
+          "tags": [
+            "networking",
+            "WAN",
+            "hub-and-spoke",
+            "connectivity"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about"
+          ]
+        },
+        {
+          "name": "Azure Route Server",
+          "slug": "route-server",
+          "url": "https://learn.microsoft.com/en-us/azure/route-server/",
+          "description": "Managed service that enables dynamic route exchange between network virtual appliances (NVAs) and your Azure virtual network using BGP, simplifying network routing management.",
+          "icon": null,
+          "tags": [
+            "networking",
+            "BGP",
+            "routing",
+            "NVA"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/route-server/overview"
+          ]
+        },
+        {
+          "name": "Azure NAT Gateway",
+          "slug": "nat-gateway",
+          "url": "https://learn.microsoft.com/en-us/azure/nat-gateway/",
+          "description": "Fully managed outbound connectivity service for Azure virtual network subnets, providing scalable and resilient SNAT without the complexity of managing network rules.",
+          "icon": null,
+          "tags": [
+            "networking",
+            "NAT",
+            "outbound",
+            "connectivity"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/nat-gateway/nat-overview"
+          ]
+        },
+        {
+          "name": "Azure Network Watcher",
+          "slug": "network-watcher",
+          "url": "https://learn.microsoft.com/en-us/azure/network-watcher/",
+          "description": "Regional monitoring, diagnostic, and analytics service for Azure virtual network resources, providing tools like connection troubleshoot, packet capture, and flow logs.",
+          "icon": null,
+          "tags": [
+            "networking",
+            "monitoring",
+            "diagnostics",
+            "flow-logs"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-overview"
+          ]
+        },
+        {
+          "name": "Azure Peering Service",
+          "slug": "peering-service",
+          "url": "https://learn.microsoft.com/en-us/azure/peering-service/",
+          "description": "Connectivity service that enhances customer connections to Microsoft cloud services, providing optimized and reliable routing from internet service providers to Microsoft.",
+          "icon": null,
+          "tags": [
+            "networking",
+            "peering",
+            "connectivity",
+            "ISP"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/peering-service/about"
+          ]
+        },
+        {
+          "name": "Azure Web Application Firewall",
+          "slug": "web-application-firewall",
+          "url": "https://learn.microsoft.com/en-us/azure/web-application-firewall/",
+          "description": "Cloud-native WAF providing centralized protection of web applications from common exploits and vulnerabilities such as SQL injection and cross-site scripting.",
+          "icon": null,
+          "tags": [
+            "security",
+            "WAF",
+            "web",
+            "firewall"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/web-application-firewall/overview"
           ]
         }
       ]
@@ -813,6 +1068,76 @@
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/purview/purview-overview"
           ]
+        },
+        {
+          "name": "Azure HDInsight",
+          "slug": "hdinsight",
+          "url": "https://learn.microsoft.com/en-us/azure/hdinsight/",
+          "description": "Fully managed cloud service for open-source analytics that makes it easy to process massive amounts of data using popular frameworks like Hadoop, Spark, Hive, and Kafka.",
+          "icon": null,
+          "tags": [
+            "analytics",
+            "big-data",
+            "Hadoop",
+            "Spark",
+            "PaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/hdinsight/hdinsight-overview"
+          ]
+        },
+        {
+          "name": "Azure Data Explorer",
+          "slug": "data-explorer",
+          "url": "https://learn.microsoft.com/en-us/azure/data-explorer/",
+          "description": "Fast, fully managed big data analytics platform optimized for near real-time analysis of large volumes of streaming telemetry, logs, and time series data using the Kusto Query Language.",
+          "icon": null,
+          "tags": [
+            "analytics",
+            "KQL",
+            "real-time",
+            "time-series",
+            "logs"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/data-explorer/data-explorer-overview"
+          ]
+        },
+        {
+          "name": "Azure Time Series Insights",
+          "slug": "time-series-insights",
+          "url": "https://learn.microsoft.com/en-us/azure/time-series-insights/",
+          "description": "End-to-end platform-as-a-service for ingesting, storing, and querying highly contextualized, time-series-optimized IoT data, with built-in visualization tools.",
+          "icon": null,
+          "tags": [
+            "analytics",
+            "IoT",
+            "time-series",
+            "visualization"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/time-series-insights/overview-what-is-tsi"
+          ]
+        },
+        {
+          "name": "Power BI Embedded",
+          "slug": "power-bi-embedded",
+          "url": "https://learn.microsoft.com/en-us/power-bi/developer/embedded/",
+          "description": "Azure analytics service for embedding fully interactive Power BI reports, dashboards, and data visualizations into custom applications without requiring a Power BI subscription.",
+          "icon": null,
+          "tags": [
+            "analytics",
+            "BI",
+            "embedded",
+            "visualization"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/power-bi/developer/embedded/embedded-analytics-power-bi"
+          ]
         }
       ]
     },
@@ -886,6 +1211,229 @@
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/foundry/what-is-foundry"
           ]
+        },
+        {
+          "name": "Azure Cognitive Services",
+          "slug": "cognitive-services",
+          "url": "https://learn.microsoft.com/en-us/azure/cognitive-services/",
+          "description": "Umbrella suite of AI APIs and services for vision, speech, language, and decision intelligence, enabling developers to add AI capabilities without machine learning expertise.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "APIs",
+            "vision",
+            "speech",
+            "language"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/cognitive-services/what-are-cognitive-services"
+          ]
+        },
+        {
+          "name": "Azure Bot Service",
+          "slug": "bot-service",
+          "url": "https://learn.microsoft.com/en-us/azure/bot-service/",
+          "description": "Integrated development environment for building, testing, and deploying intelligent bots that interact naturally with users over multiple channels including Teams, Slack, and web chat.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "chatbot",
+            "conversational",
+            "PaaS"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/bot-service/bot-service-overview"
+          ]
+        },
+        {
+          "name": "Azure Language Service",
+          "slug": "language-service",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/language-service/",
+          "description": "Managed NLP service offering pre-built and customizable features including sentiment analysis, key phrase extraction, named entity recognition, and conversational language understanding.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "NLP",
+            "text-analytics",
+            "language"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/language-service/overview"
+          ]
+        },
+        {
+          "name": "Azure Translator",
+          "slug": "translator",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/translator/",
+          "description": "Cloud-based neural machine translation service supporting 100+ languages and dialects for real-time multilingual text and document translation.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "translation",
+            "NLP",
+            "language"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/translator/translator-overview"
+          ]
+        },
+        {
+          "name": "Azure Speech Service",
+          "slug": "speech-service",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/",
+          "description": "Unified speech API providing speech-to-text, text-to-speech, speech translation, and speaker recognition capabilities with support for 100+ languages.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "speech",
+            "STT",
+            "TTS",
+            "language"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/overview"
+          ]
+        },
+        {
+          "name": "Azure Computer Vision",
+          "slug": "computer-vision",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/",
+          "description": "AI service for extracting information from images and video, including optical character recognition (OCR), object detection, scene analysis, and image captioning.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "vision",
+            "OCR",
+            "image-analysis"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/overview"
+          ]
+        },
+        {
+          "name": "Azure Form Recognizer",
+          "slug": "form-recognizer",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/",
+          "description": "AI document processing service (now Azure AI Document Intelligence) that extracts text, tables, key-value pairs, and structure from documents using pre-built and custom models.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "document-intelligence",
+            "OCR",
+            "forms"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview"
+          ]
+        },
+        {
+          "name": "Azure Video Indexer",
+          "slug": "video-indexer",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-video-indexer/",
+          "description": "AI video and audio analysis service that automatically extracts insights such as transcripts, faces, topics, brands, and shot detection from media files.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "video",
+            "media-analytics",
+            "insights"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-video-indexer/video-indexer-overview"
+          ]
+        },
+        {
+          "name": "Azure Personalizer",
+          "slug": "personalizer",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/personalizer/",
+          "description": "AI service using reinforcement learning to select the best content action for each user in real time, optimizing for business outcomes defined by custom reward signals.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "reinforcement-learning",
+            "personalization",
+            "recommendations"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/personalizer/what-is-personalizer"
+          ]
+        },
+        {
+          "name": "Azure Anomaly Detector",
+          "slug": "anomaly-detector",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/",
+          "description": "AI service that automatically detects anomalies in univariate and multivariate time series data, requiring no machine learning knowledge to deploy.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "anomaly-detection",
+            "time-series",
+            "monitoring"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/anomaly-detector/overview"
+          ]
+        },
+        {
+          "name": "Azure Metrics Advisor",
+          "slug": "metrics-advisor",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/metrics-advisor/",
+          "description": "AI-powered monitoring service for multivariate time series data that automatically detects issues, diagnoses root causes, and provides customizable alert configurations.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "metrics",
+            "monitoring",
+            "anomaly-detection"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/metrics-advisor/overview"
+          ]
+        },
+        {
+          "name": "Azure Content Moderator",
+          "slug": "content-moderator",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/content-moderator/",
+          "description": "AI service for detecting potentially offensive, harmful, or undesirable content in text, images, and video to support human review workflows and policy enforcement.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "moderation",
+            "content-safety",
+            "text"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/content-moderator/overview"
+          ]
+        },
+        {
+          "name": "Azure Immersive Reader",
+          "slug": "immersive-reader",
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/immersive-reader/",
+          "description": "Accessibility tool that implements proven techniques to improve reading comprehension for emerging readers, language learners, and people with learning differences like dyslexia.",
+          "icon": null,
+          "tags": [
+            "AI",
+            "accessibility",
+            "reading",
+            "education"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/ai-services/immersive-reader/overview"
+          ]
         }
       ]
     },
@@ -957,6 +1505,125 @@
           "pricing_model": "Per GB ingested",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/sentinel/overview"
+          ]
+        },
+        {
+          "name": "Microsoft Entra External ID",
+          "slug": "entra-external-id",
+          "url": "https://learn.microsoft.com/en-us/entra/external-id/",
+          "description": "External identity solution for managing and securing customer and partner identities, supporting social logins and custom authentication flows for external-facing applications.",
+          "icon": null,
+          "tags": [
+            "identity",
+            "CIAM",
+            "B2C",
+            "authentication"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/entra/external-id/overview-customers"
+          ]
+        },
+        {
+          "name": "Microsoft Entra Verified ID",
+          "slug": "entra-verified-id",
+          "url": "https://learn.microsoft.com/en-us/entra/verified-id/",
+          "description": "Decentralized identity service for issuing and verifying digital credentials based on open standards, enabling privacy-respecting identity verification workflows.",
+          "icon": null,
+          "tags": [
+            "identity",
+            "verifiable-credentials",
+            "decentralized",
+            "DID"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/entra/verified-id/introduction-to-verifiable-credentials-architecture"
+          ]
+        },
+        {
+          "name": "Azure Managed HSM",
+          "slug": "managed-hsm",
+          "url": "https://learn.microsoft.com/en-us/azure/key-vault/managed-hsm/",
+          "description": "Fully managed, highly available, single-tenant cloud HSM service for safeguarding cryptographic keys using FIPS 140-2 Level 3 validated hardware security modules.",
+          "icon": null,
+          "tags": [
+            "security",
+            "HSM",
+            "cryptography",
+            "key-management"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/key-vault/managed-hsm/overview"
+          ]
+        },
+        {
+          "name": "Azure Dedicated HSM",
+          "slug": "dedicated-hsm",
+          "url": "https://learn.microsoft.com/en-us/azure/dedicated-hsm/",
+          "description": "Single-tenant physical HSM devices hosted in Azure datacenters, giving customers exclusive and direct access to FIPS 140-2 Level 3 hardware for cryptographic operations.",
+          "icon": null,
+          "tags": [
+            "security",
+            "HSM",
+            "IaaS",
+            "cryptography"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/dedicated-hsm/overview"
+          ]
+        },
+        {
+          "name": "Azure Confidential Computing",
+          "slug": "confidential-computing",
+          "url": "https://learn.microsoft.com/en-us/azure/confidential-computing/",
+          "description": "Protects data in use by performing computations inside hardware-based Trusted Execution Environments (TEEs), isolating sensitive data from the cloud provider and OS.",
+          "icon": null,
+          "tags": [
+            "security",
+            "TEE",
+            "data-protection",
+            "IaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/confidential-computing/overview"
+          ]
+        },
+        {
+          "name": "Azure Lighthouse",
+          "slug": "lighthouse",
+          "url": "https://learn.microsoft.com/en-us/azure/lighthouse/",
+          "description": "Cross-tenant management platform enabling service providers and enterprise IT teams to manage multiple customer Azure environments at scale from a single pane of glass.",
+          "icon": null,
+          "tags": [
+            "governance",
+            "multi-tenant",
+            "MSP",
+            "management"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/lighthouse/overview"
+          ]
+        },
+        {
+          "name": "Azure Payment HSM",
+          "slug": "payment-hsm",
+          "url": "https://learn.microsoft.com/en-us/azure/payment-hsm/",
+          "description": "Single-tenant, bare-metal HSM service for payment transaction processing, meeting PCI DSS and PCI PIN requirements for financial institutions.",
+          "icon": null,
+          "tags": [
+            "security",
+            "HSM",
+            "payments",
+            "PCI-DSS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/payment-hsm/overview"
           ]
         }
       ]
@@ -1078,6 +1745,57 @@
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/managed-grafana/overview"
           ]
+        },
+        {
+          "name": "Azure Log Analytics",
+          "slug": "log-analytics",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-overview",
+          "description": "Log management and query tool within Azure Monitor for collecting, indexing, and analyzing log and performance data from cloud and on-premises resources using the Kusto Query Language.",
+          "icon": null,
+          "tags": [
+            "monitoring",
+            "logs",
+            "KQL",
+            "analytics"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-tutorial"
+          ]
+        },
+        {
+          "name": "Azure Cost Management",
+          "slug": "cost-management",
+          "url": "https://learn.microsoft.com/en-us/azure/cost-management-billing/",
+          "description": "Service for monitoring, analyzing, and optimizing Azure spending with tools for budgets, cost alerts, recommendations, and granular billing breakdowns across subscriptions.",
+          "icon": null,
+          "tags": [
+            "management",
+            "cost",
+            "billing",
+            "governance"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/cost-management-billing/cost-management-billing-overview"
+          ]
+        },
+        {
+          "name": "Azure Service Health",
+          "slug": "service-health",
+          "url": "https://learn.microsoft.com/en-us/azure/service-health/",
+          "description": "Personalized dashboard and alerting service that notifies you of Azure platform issues, planned maintenance, and health advisories affecting your specific resources.",
+          "icon": null,
+          "tags": [
+            "monitoring",
+            "health",
+            "alerts",
+            "availability"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/service-health/overview"
+          ]
         }
       ]
     },
@@ -1115,6 +1833,57 @@
           "pricing_model": "Pay-as-you-go",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/digital-twins/overview"
+          ]
+        },
+        {
+          "name": "Azure IoT Central",
+          "slug": "iot-central",
+          "url": "https://learn.microsoft.com/en-us/azure/iot-central/",
+          "description": "Fully managed IoT SaaS platform for connecting, monitoring, and managing IoT devices at scale with built-in device management, data visualization, and rules engine.",
+          "icon": null,
+          "tags": [
+            "IoT",
+            "SaaS",
+            "device-management",
+            "monitoring"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/iot-central/core/overview-iot-central"
+          ]
+        },
+        {
+          "name": "Azure IoT Edge",
+          "slug": "iot-edge",
+          "url": "https://learn.microsoft.com/en-us/azure/iot-edge/",
+          "description": "Cloud-managed service for deploying cloud intelligence and analytics workloads directly onto IoT edge devices, enabling offline operation and reduced latency.",
+          "icon": null,
+          "tags": [
+            "IoT",
+            "edge-computing",
+            "containers",
+            "offline"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/iot-edge/about-iot-edge"
+          ]
+        },
+        {
+          "name": "Azure Sphere",
+          "slug": "sphere",
+          "url": "https://learn.microsoft.com/en-us/azure-sphere/",
+          "description": "End-to-end IoT security solution combining a secured MCU hardware chip, a custom Linux-based OS, and a cloud security service to protect connected devices at the silicon level.",
+          "icon": null,
+          "tags": [
+            "IoT",
+            "security",
+            "MCU",
+            "hardware"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure-sphere/product-overview/what-is-azure-sphere"
           ]
         }
       ]
@@ -1202,6 +1971,74 @@
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/automation/automation-intro"
           ]
+        },
+        {
+          "name": "Azure VMware Solution",
+          "slug": "vmware-solution",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-vmware/",
+          "description": "Runs VMware workloads natively on Azure with full VMware compatibility, enabling lift-and-shift migrations of VMware environments to Azure without re-architecting applications.",
+          "icon": null,
+          "tags": [
+            "hybrid",
+            "VMware",
+            "migration",
+            "IaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-vmware/introduction"
+          ]
+        },
+        {
+          "name": "Azure Stack Hub",
+          "slug": "stack-hub",
+          "url": "https://learn.microsoft.com/en-us/azure-stack/hub/",
+          "description": "Hybrid cloud platform that extends Azure services to your own datacenter, enabling consistent Azure application development and deployment in disconnected or regulated environments.",
+          "icon": null,
+          "tags": [
+            "hybrid",
+            "on-premises",
+            "datacenter",
+            "disconnected"
+          ],
+          "pricing_model": "Subscription",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure-stack/hub/azure-stack-overview"
+          ]
+        },
+        {
+          "name": "Azure Stack Edge",
+          "slug": "stack-edge",
+          "url": "https://learn.microsoft.com/en-us/azure/databox-online/",
+          "description": "AI-enabled edge computing appliance that brings cloud processing to your location, running Azure services and AI workloads on-premises with hardware-accelerated ML inference.",
+          "icon": null,
+          "tags": [
+            "hybrid",
+            "edge-computing",
+            "AI",
+            "hardware"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/databox-online/azure-stack-edge-overview"
+          ]
+        },
+        {
+          "name": "Azure Stack HCI",
+          "slug": "stack-hci",
+          "url": "https://learn.microsoft.com/en-us/azure-stack/hci/",
+          "description": "Hyper-converged infrastructure solution that runs virtualized Windows and Linux workloads on-premises using Azure-integrated management, billing, and monitoring.",
+          "icon": null,
+          "tags": [
+            "hybrid",
+            "HCI",
+            "virtualization",
+            "on-premises"
+          ],
+          "pricing_model": "Subscription",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure-stack/hci/overview"
+          ]
         }
       ]
     },
@@ -1239,6 +2076,456 @@
           "pricing_model": "Cluster-based",
           "documentation_links": [
             "https://learn.microsoft.com/en-us/azure/openshift/intro-openshift"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "description": "",
+      "services": [
+        {
+          "name": "Azure Queue Storage",
+          "slug": "queue-storage",
+          "url": "https://learn.microsoft.com/en-us/azure/storage/queues/",
+          "description": "Simple, cost-effective cloud message queue service for storing large numbers of messages to decouple and asynchronously scale application components.",
+          "icon": null,
+          "tags": [
+            "messaging",
+            "queue",
+            "async",
+            "storage"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/storage/queues/storage-queues-introduction"
+          ]
+        },
+        {
+          "name": "Azure Web PubSub",
+          "slug": "web-pubsub",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/",
+          "description": "Fully managed real-time messaging service that uses WebSocket connections to push content updates to connected clients for web and mobile applications.",
+          "icon": null,
+          "tags": [
+            "messaging",
+            "WebSocket",
+            "real-time",
+            "pub-sub"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/overview"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Developer Tools",
+      "description": "",
+      "services": [
+        {
+          "name": "Azure Lab Services",
+          "slug": "lab-services",
+          "url": "https://learn.microsoft.com/en-us/azure/lab-services/",
+          "description": "Managed lab environment service for creating and provisioning pre-configured virtual machines for training, education, and hands-on workshops without infrastructure management.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "education",
+            "labs",
+            "PaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/lab-services/lab-services-overview"
+          ]
+        },
+        {
+          "name": "Azure DevTest Labs",
+          "slug": "devtest-labs",
+          "url": "https://learn.microsoft.com/en-us/azure/devtest-labs/",
+          "description": "Service enabling developers and testers to quickly create environments in Azure while minimizing waste and controlling cost through policies, reusable templates, and automated shutdowns.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "testing",
+            "cost-control",
+            "PaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devtest-labs/devtest-lab-overview"
+          ]
+        },
+        {
+          "name": "Azure Blueprints",
+          "slug": "blueprints",
+          "url": "https://learn.microsoft.com/en-us/azure/governance/blueprints/",
+          "description": "Declarative governance service for composing and deploying a repeatable set of Azure resources, policies, and role assignments as a single tracked artifact.",
+          "icon": null,
+          "tags": [
+            "governance",
+            "compliance",
+            "IaC",
+            "developer-tools"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/governance/blueprints/overview"
+          ]
+        },
+        {
+          "name": "Azure Repos",
+          "slug": "repos",
+          "url": "https://learn.microsoft.com/en-us/azure/devops/repos/",
+          "description": "Cloud-hosted Git and TFVC version control repositories within Azure DevOps, supporting pull requests, branch policies, and code reviews for teams of any size.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "git",
+            "version-control",
+            "DevOps"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devops/repos/get-started/what-is-repos"
+          ]
+        },
+        {
+          "name": "Azure Pipelines",
+          "slug": "pipelines",
+          "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/",
+          "description": "CI/CD service for automatically building, testing, and deploying code to any platform or cloud, supporting YAML pipeline definitions and integration with GitHub and Azure Repos.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "CI-CD",
+            "DevOps",
+            "automation"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/what-is-azure-pipelines"
+          ]
+        },
+        {
+          "name": "Azure Boards",
+          "slug": "boards",
+          "url": "https://learn.microsoft.com/en-us/azure/devops/boards/",
+          "description": "Agile work tracking and project management tool within Azure DevOps supporting Kanban boards, sprint planning, backlogs, and reporting for software development teams.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "agile",
+            "project-management",
+            "DevOps"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devops/boards/get-started/what-is-azure-boards"
+          ]
+        },
+        {
+          "name": "Azure Artifacts",
+          "slug": "artifacts",
+          "url": "https://learn.microsoft.com/en-us/azure/devops/artifacts/",
+          "description": "Universal package management service within Azure DevOps for hosting and sharing NuGet, npm, Maven, Python, and Universal packages, with upstream source support.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "package-management",
+            "DevOps",
+            "artifacts"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devops/artifacts/start-using-azure-artifacts"
+          ]
+        },
+        {
+          "name": "Azure Test Plans",
+          "slug": "test-plans",
+          "url": "https://learn.microsoft.com/en-us/azure/devops/test/",
+          "description": "Manual and exploratory testing service within Azure DevOps for planning, executing, and tracking test cases, supporting both web and desktop apps with test evidence capture.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "testing",
+            "QA",
+            "DevOps"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/devops/test/overview"
+          ]
+        },
+        {
+          "name": "Azure Deployment Environments",
+          "slug": "deployment-environments",
+          "url": "https://learn.microsoft.com/en-us/azure/deployment-environments/",
+          "description": "Service enabling development teams to provision consistent, project-based application infrastructure using administrator-curated IaC templates for dev, test, and staging environments.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "environments",
+            "IaC",
+            "PaaS"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/deployment-environments/overview-what-is-azure-deployment-environments"
+          ]
+        },
+        {
+          "name": "Azure Load Testing",
+          "slug": "load-testing",
+          "url": "https://learn.microsoft.com/en-us/azure/load-testing/",
+          "description": "Fully managed load testing service that generates high-scale traffic to identify application performance bottlenecks and validate how apps behave under peak load conditions.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "testing",
+            "performance",
+            "load-testing"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/load-testing/overview-what-is-azure-load-testing"
+          ]
+        },
+        {
+          "name": "Azure Chaos Studio",
+          "slug": "chaos-studio",
+          "url": "https://learn.microsoft.com/en-us/azure/chaos-studio/",
+          "description": "Managed chaos engineering service for improving application resilience by injecting controlled faults into Azure resources, services, and dependencies in real experiments.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "chaos-engineering",
+            "resilience",
+            "testing"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/chaos-studio/chaos-studio-overview"
+          ]
+        },
+        {
+          "name": "Azure Maps",
+          "slug": "maps",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-maps/",
+          "description": "Geospatial platform providing mapping APIs, search, routing, traffic, and weather services for building location-aware web and mobile applications.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "maps",
+            "geospatial",
+            "location"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-maps/about-azure-maps"
+          ]
+        },
+        {
+          "name": "Azure Spatial Anchors",
+          "slug": "spatial-anchors",
+          "url": "https://learn.microsoft.com/en-us/azure/spatial-anchors/",
+          "description": "Cross-platform mixed reality service for creating spatially aware applications that persistently place, share, and find 3D content at specific real-world locations.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "mixed-reality",
+            "AR",
+            "spatial"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/spatial-anchors/overview"
+          ]
+        },
+        {
+          "name": "Azure Fluid Relay",
+          "slug": "fluid-relay",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-fluid-relay/",
+          "description": "Managed service for the Fluid Framework enabling distributed, low-latency real-time collaboration in applications — such as co-editing, live cursors, and shared state.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "real-time",
+            "collaboration",
+            "Fluid"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/azure-fluid-relay/overview/overview"
+          ]
+        },
+        {
+          "name": "Azure Managed Applications",
+          "slug": "managed-applications",
+          "url": "https://learn.microsoft.com/en-us/azure/managed-applications/",
+          "description": "Service for building and publishing managed cloud solutions on the Azure Marketplace or a service catalog, allowing providers to maintain infrastructure while customers use the solution.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "marketplace",
+            "governance",
+            "PaaS"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/managed-applications/overview"
+          ]
+        },
+        {
+          "name": "Azure Service Catalog",
+          "slug": "service-catalog",
+          "url": "https://learn.microsoft.com/en-us/azure/managed-applications/",
+          "description": "Organization-internal catalog of approved managed applications and templates, enabling IT teams to offer curated Azure solutions to developers while enforcing compliance.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "governance",
+            "catalog",
+            "managed-apps"
+          ],
+          "pricing_model": "Free tier + usage",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/managed-applications/publish-service-catalog-app"
+          ]
+        },
+        {
+          "name": "Azure Health Data Services",
+          "slug": "health-data-services",
+          "url": "https://learn.microsoft.com/en-us/azure/healthcare-apis/",
+          "description": "Managed platform for storing, analyzing, and exchanging protected health information (PHI) at scale, supporting FHIR, DICOM, and MedTech service standards for healthcare interoperability.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "healthcare",
+            "FHIR",
+            "PHI"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/healthcare-apis/healthcare-apis-overview"
+          ]
+        },
+        {
+          "name": "GitHub Actions",
+          "slug": "github-actions",
+          "url": "https://docs.github.com/en/actions",
+          "description": "CI/CD and workflow automation platform built into GitHub repositories, enabling developers to automate build, test, and deployment pipelines using YAML workflows triggered by GitHub events.",
+          "icon": null,
+          "tags": [
+            "developer-tools",
+            "CI-CD",
+            "automation",
+            "GitHub"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Media and Communication",
+      "description": "",
+      "services": [
+        {
+          "name": "Azure Communication Services",
+          "slug": "communication-services",
+          "url": "https://learn.microsoft.com/en-us/azure/communication-services/",
+          "description": "Cloud-based communications platform providing voice calling, video conferencing, chat, SMS, and email APIs for embedding real-time communication into custom applications.",
+          "icon": null,
+          "tags": [
+            "communication",
+            "video",
+            "chat",
+            "SMS",
+            "PaaS"
+          ],
+          "pricing_model": "Per request",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/communication-services/overview"
+          ]
+        },
+        {
+          "name": "Azure Media Services",
+          "slug": "media-services",
+          "url": "https://learn.microsoft.com/en-us/azure/media-services/",
+          "description": "Cloud-based media processing and live/on-demand streaming platform for encoding, packaging, protecting with DRM, and delivering video content at global scale.",
+          "icon": null,
+          "tags": [
+            "media",
+            "streaming",
+            "video",
+            "encoding"
+          ],
+          "pricing_model": "Per GB",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/media-services/latest/media-services-overview"
+          ]
+        },
+        {
+          "name": "Azure Remote Rendering",
+          "slug": "remote-rendering",
+          "url": "https://learn.microsoft.com/en-us/azure/remote-rendering/",
+          "description": "Cloud-based 3D rendering service that renders complex, high-polygon models server-side and streams the result to mixed reality devices like HoloLens 2 with low latency.",
+          "icon": null,
+          "tags": [
+            "mixed-reality",
+            "rendering",
+            "3D",
+            "HoloLens"
+          ],
+          "pricing_model": "Per hour",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/remote-rendering/overview/about"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Quantum and Specialized",
+      "description": "",
+      "services": [
+        {
+          "name": "Azure Orbital",
+          "slug": "orbital",
+          "url": "https://learn.microsoft.com/en-us/azure/orbital/",
+          "description": "Fully managed ground station as a service for scheduling satellite contacts and downlinking data directly into Azure, eliminating the need to build and operate ground station infrastructure.",
+          "icon": null,
+          "tags": [
+            "specialized",
+            "satellite",
+            "ground-station",
+            "space"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/orbital/overview"
+          ]
+        },
+        {
+          "name": "Azure Quantum",
+          "slug": "quantum",
+          "url": "https://learn.microsoft.com/en-us/azure/quantum/",
+          "description": "Open cloud ecosystem providing access to quantum hardware from IonQ, Quantinuum, and others alongside quantum-inspired optimization solvers and Microsoft Quantum Development Kit.",
+          "icon": null,
+          "tags": [
+            "quantum",
+            "specialized",
+            "optimization",
+            "research"
+          ],
+          "pricing_model": "Per unit",
+          "documentation_links": [
+            "https://learn.microsoft.com/en-us/azure/quantum/overview-azure-quantum"
           ]
         }
       ]

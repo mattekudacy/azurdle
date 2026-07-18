@@ -16,6 +16,7 @@ import {
 } from "@/lib/anon-progress";
 import type { ServiceEntry } from "@/lib/service-entry";
 import { compareAttributes } from "@/lib/attribute-comparison";
+import { getServiceInfo } from "@/lib/service-info";
 
 const MAX_GUESSES = 5;
 const TOTAL_CLUES = 5;
@@ -124,6 +125,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const answerMeta = gameOver ? getServiceInfo(puzzle.answer) : undefined;
+
   const response = NextResponse.json({
     correct,
     gameOver,
@@ -132,6 +135,9 @@ export async function POST(request: Request) {
     // Safe to send the full ladder once the game is over — the answer
     // itself is already revealed at that point, so this isn't a new leak.
     allClues: gameOver ? puzzle.clues : undefined,
+    answerDescription: answerMeta?.description,
+    answerUrl: answerMeta?.url,
+    answerDocLinks: answerMeta?.documentation_links,
     attributeComparison,
   });
 
