@@ -42,7 +42,7 @@ export default function Home() {
           <a href="#">Support</a>
           <a href="#">GitHub ↗</a>
         </nav>
-        <span className={styles.copyright}>© 2024 Cloud Labs Inc.</span>
+        <span className={styles.copyright}>© {new Date().getFullYear()} Cyrus & Mark</span>
       </footer>
     </div>
   );
