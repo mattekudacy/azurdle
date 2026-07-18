@@ -6,24 +6,24 @@ import { HelpIcon, CloseIcon } from "./icons";
 
 const LADDER = [
   {
-    title: "The Problem",
-    body: "The challenge starts with the broad business problem this service was designed to solve.",
+    title: "Broad Problem",
+    body: "The first clue describes the kind of workload or business problem the service helps solve.",
   },
   {
-    title: "The Constraint",
-    body: "A detail that narrows the field, cutting the list of candidates roughly in half.",
+    title: "Key Constraint",
+    body: "A second detail narrows the field without giving away the exact product name.",
   },
   {
-    title: "The Architecture",
-    body: "How it behaves in a real system, narrowing things down to a category or a couple of sibling services.",
+    title: "Architecture Shape",
+    body: "The clue shifts into how the service behaves inside an Azure architecture.",
   },
   {
-    title: "The Term of Art",
-    body: "Vocabulary that only this service (and maybe one close confuser) uses.",
+    title: "Service Vocabulary",
+    body: "Expect a phrase, capability, or term that points toward a small set of close candidates.",
   },
   {
-    title: "The Giveaway",
-    body: "An AWS equivalent, an abbreviation, or a fact that points directly at one answer.",
+    title: "Giveaway",
+    body: "The final clue should make the answer unmistakable if you know the service.",
   },
 ];
 
@@ -56,8 +56,8 @@ export default function HowToPlay() {
           </button>
         </div>
         <p className={styles.intro}>
-          Identify the daily Azure service by working through a 5-step clue ladder. Every day is a
-          new puzzle box.
+          Guess the daily Azure service in 5 tries or fewer. Start from the first clue, enter a real
+          Azure service, and use each miss to narrow the field.
         </p>
         <ol className={styles.ladder}>
           {LADDER.map((step, i) => (
@@ -71,11 +71,13 @@ export default function HowToPlay() {
           ))}
         </ol>
         <div className={styles.rules}>
-          <p className={styles.rulesTitle}>Rules of the box</p>
+          <p className={styles.rulesTitle}>Rules</p>
           <ul className={styles.rulesList}>
+            <li>You get 5 guesses for the daily puzzle.</li>
             <li>Each wrong guess reveals the next clue.</li>
-            <li>You have 5 guesses total. Fewer clues used means a better result.</li>
-            <li>A new puzzle box opens every day at midnight UTC.</li>
+            <li>Autocomplete suggests valid Azure services you can submit.</li>
+            <li>The guess log compares your prior guesses against the answer.</li>
+            <li>A new puzzle opens every day at midnight UTC.</li>
           </ul>
         </div>
       </dialog>
