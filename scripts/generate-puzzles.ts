@@ -64,6 +64,13 @@ function loadServiceVocab(): ServiceEntry[] {
 }
 
 const CLUE_LADDER_SPEC = `
+ABSOLUTE RULE: No clue may contain the answer service's name, any of its aliases,
+or any abbreviation unique to it (e.g. "ACA", "AKS", "APIM"). The whole point of the
+game is for the player to guess the name — writing it in a clue breaks the puzzle.
+This includes partial matches: "Container Apps" in a clue about Azure Container Apps
+is just as forbidden as the full name. Abbreviations and unique names are for clue 5
+only when rephrased as a riddle hint, not a giveaway label.
+
 Every puzzle has exactly 5 clues following this ladder, each roughly halving the
 candidate set (clue 1 fits ~15 services, clue 5 fits exactly 1):
 1. The problem, with one fingerprint — plain business language, no Azure jargon,
@@ -234,6 +241,10 @@ async function draftPuzzle(
         role: "system",
         content:
           "You write puzzles for Azurdle, a daily Azure-service guessing game. " +
+          "CRITICAL: None of the 5 clues may contain the answer service's name, any alias, " +
+          "or any abbreviation that uniquely identifies it — the player must guess the name, so " +
+          "writing it in a clue is an automatic failure. Describe what the service DOES and HOW " +
+          "it works, never what it is CALLED. " +
           "Respond with ONLY a JSON object matching this shape: " +
           '{"answer": string, "aliases": string[], "clues": string[5], "category": string, "difficulty": "easy"|"medium"|"hard"}',
       },

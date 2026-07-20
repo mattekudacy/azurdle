@@ -27,7 +27,33 @@ export type CalibrationResult =
  * rate read as genuinely ambiguous to a human. The check was rejecting good
  * clues, not catching bad ones. See CLAUDE.md for the fuller rationale.
  */
+/**
+ * Hard structural check — runs before any LLM call.
+ * Fails immediately if any clue contains the answer name or an alias verbatim
+ * (case-insensitive substring match). This catches the most obvious generation
+ * failure — a clue that simply states "Azure Foo is a ..." — without burning
+ * any API quota.
+ */
+function containsAnswerName(puzzle: Puzzle): string | null {
+  const terms = [puzzle.answer, ...(puzzle.aliases ?? [])].map((t) => t.toLowerCase());
+  for (let i = 0; i < puzzle.clues.length; i++) {
+    const clue = puzzle.clues[i].toLowerCase();
+    for (const term of terms) {
+      if (term.length > 2 && clue.includes(term)) {
+        return `Clue ${i + 1} contains the answer name "${term}" verbatim`;
+      }
+    }
+  }
+  return null;
+}
+
 export async function calibrate(puzzle: Puzzle, entry?: ServiceEntry): Promise<CalibrationResult> {
+  const nameLeakIssue = containsAnswerName(puzzle);
+  if (nameLeakIssue) {
+    console.log(`  answer name leak: ${nameLeakIssue}`);
+    return { passed: false, reason: "fact_check", issues: [nameLeakIssue] };
+  }
+
   const shortlistReply = await chatText(MODEL, [
     {
       role: "system",
