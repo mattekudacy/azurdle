@@ -88,6 +88,25 @@ type GuessResponse = {
   attributeComparison?: AttributeComparison;
 };
 
+type PuzzleLeaderboardEntry = {
+  userId: string;
+  displayName: string;
+  cluesRevealed: number;
+  elapsedSeconds: number | null;
+  totalSolved: number;
+};
+
+type PuzzleStats = {
+  totalPlayed: number;
+  totalSolved: number;
+  solveRate: number;
+  solveDistribution: Record<number, number>;
+  leaderboard: PuzzleLeaderboardEntry[];
+  myCluesRevealed: number | null;
+  mySolved: boolean | null;
+  myUserId: string | null;
+};
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -126,6 +145,7 @@ export default function GameBoard() {
   const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
+  const [puzzleStats, setPuzzleStats] = useState<PuzzleStats | null>(null);
   const nudgeFiredRef = useRef(false);
   // Index of the clue that just arrived because of a miss — drives a
   // one-time highlight on that clue only, distinct from the fade-in every
@@ -190,6 +210,22 @@ export default function GameBoard() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Reset per-puzzle state when the puzzle date changes (archive navigation)
+  useEffect(() => {
+    setPuzzleStats(null);
+    nudgeFiredRef.current = false;
+  }, [puzzleDate]);
+
+  // Fetch puzzle-level stats once the game ends
+  useEffect(() => {
+    if (!progress?.gameOver || !puzzle) return;
+    const date = puzzle.date;
+    fetch(`/api/puzzle-stats?date=${date}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setPuzzleStats(data); })
+      .catch(() => {/* non-fatal */});
+  }, [progress?.gameOver, puzzle]);
 
   // Fire confetti on win (all users), open auth nudge modal for guests.
   // nudgeFiredRef prevents re-firing on metadata-merge re-renders.
@@ -575,6 +611,75 @@ export default function GameBoard() {
                   <ShareIcon />
                   {copied ? "Copied!" : "Share Results"}
                 </button>
+              </div>
+            )}
+
+            {/* Per-puzzle community stats + leaderboard */}
+            {progress.gameOver && puzzleStats && (
+              <div className={styles.puzzleStats}>
+                <div className={styles.puzzleStatsMeta}>
+                  <span className={styles.puzzleStatItem}>
+                    <span className={styles.puzzleStatValue}>{puzzleStats.totalPlayed}</span>
+                    <span className={styles.puzzleStatLabel}>Players</span>
+                  </span>
+                  <span className={styles.puzzleStatItem}>
+                    <span className={styles.puzzleStatValue}>{puzzleStats.solveRate}%</span>
+                    <span className={styles.puzzleStatLabel}>Solved</span>
+                  </span>
+                  <div className={styles.puzzleDistribution}>
+                    {[1, 2, 3, 4, 5].map((clue) => {
+                      const count = puzzleStats.solveDistribution[clue] ?? 0;
+                      const max = Math.max(1, ...Object.values(puzzleStats.solveDistribution));
+                      const isMe = puzzleStats.myCluesRevealed === clue && puzzleStats.mySolved;
+                      return (
+                        <div key={clue} className={styles.puzzleDistBar}>
+                          <span className={styles.puzzleDistLabel}>{clue}</span>
+                          <div className={styles.puzzleDistTrack}>
+                            <div
+                              className={`${styles.puzzleDistFill} ${isMe ? styles.puzzleDistFillMe : ""}`}
+                              style={{ width: count === 0 ? "4px" : `${Math.round((count / max) * 100)}%` }}
+                            />
+                          </div>
+                          <span className={`${styles.puzzleDistCount} ${isMe ? styles.puzzleDistCountMe : ""}`}>
+                            {count}{isMe ? " ✓" : ""}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {puzzleStats.leaderboard.length > 0 && (
+                  <div className={styles.puzzleLeaderboard}>
+                    <p className={styles.puzzleLeaderboardTitle}>Puzzle Leaderboard</p>
+                    <div className={styles.puzzleLeaderboardHeader}>
+                      <span></span>
+                      <span>Player</span>
+                      <span>Clue</span>
+                      <span>Time</span>
+                      <span>Total</span>
+                    </div>
+                    <ul className={styles.puzzleLeaderboardList}>
+                      {puzzleStats.leaderboard.slice(0, 10).map((entry, i) => {
+                        const isMe = puzzleStats.myUserId && entry.userId === puzzleStats.myUserId;
+                        return (
+                          <li
+                            key={entry.userId}
+                            className={`${styles.puzzleLeaderboardRow} ${isMe ? styles.puzzleLeaderboardRowMe : ""}`}
+                          >
+                            <span className={styles.puzzleLeaderboardRank}>{i + 1}</span>
+                            <span className={styles.puzzleLeaderboardName}>{entry.displayName}</span>
+                            <span className={styles.puzzleLeaderboardClue}>#{entry.cluesRevealed}</span>
+                            <span className={styles.puzzleLeaderboardTime}>
+                              {entry.elapsedSeconds != null ? formatTime(entry.elapsedSeconds) : "—"}
+                            </span>
+                            <span className={styles.puzzleLeaderboardTotal}>{entry.totalSolved}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 

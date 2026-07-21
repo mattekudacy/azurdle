@@ -96,7 +96,7 @@
 
 .leaderboardHeader {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: 20px 1fr auto auto;
   gap: var(--space-sm);
   padding: 0 var(--space-xs) var(--space-xs);
   font-size: 10px;
@@ -118,7 +118,7 @@
 
 .leaderboardRow {
   display: grid;
-  grid-template-columns: 20px 1fr auto auto auto;
+  grid-template-columns: 20px 1fr auto auto;
   align-items: center;
   gap: var(--space-sm);
   padding: 6px var(--space-xs);
@@ -128,6 +128,11 @@
 
 .leaderboardRow:nth-child(odd) {
   background: var(--surface);
+}
+
+.leaderboardRowMe {
+  background: rgb(0 95 170 / 0.07) !important;
+  font-weight: 600;
 }
 
 .leaderboardRank {
@@ -214,8 +219,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
   margin-bottom: var(--space-lg);
 }
 

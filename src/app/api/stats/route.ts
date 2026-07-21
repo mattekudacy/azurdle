@@ -2,12 +2,11 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-type LeaderboardEntry = {
+type AllTimeEntry = {
   userId: string;
   displayName: string;
-  cluesRevealed: number;
-  elapsedSeconds: number | null;
   totalSolved: number;
+  avgClues: number;
 };
 
 function formatName(meta: Record<string, string> | null, email: string | null): string {
@@ -18,45 +17,38 @@ function formatName(meta: Record<string, string> | null, email: string | null): 
 }
 
 export async function GET() {
-  const today = new Date().toISOString().slice(0, 10);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const admin = createAdminClient();
 
-  // Today's completed solves — only players who solved it
-  const { data: todayRows, error: todayError } = await admin
+  // All-time leaderboard: rank all users by total solved → avg clues
+  const { data: allAttempts } = await admin
     .from("attempts")
-    .select("user_id, clues_revealed, elapsed_seconds")
-    .eq("puzzle_date", today)
+    .select("user_id, clues_revealed")
     .eq("solved", true)
-    .not("completed_at", "is", null)
-    .order("clues_revealed", { ascending: true })
-    .order("elapsed_seconds", { ascending: true, nullsFirst: false });
+    .not("completed_at", "is", null);
 
-  if (todayError) throw todayError;
-
-  const solvers = todayRows ?? [];
-
-  // Total puzzles solved per user (all time) — just the solver IDs we need
-  const userIds = solvers.map((r) => r.user_id);
-
-  let totalSolvedByUser: Record<string, number> = {};
-  if (userIds.length > 0) {
-    const { data: allTime } = await admin
-      .from("attempts")
-      .select("user_id")
-      .in("user_id", userIds)
-      .eq("solved", true);
-
-    for (const row of allTime ?? []) {
-      totalSolvedByUser[row.user_id] = (totalSolvedByUser[row.user_id] ?? 0) + 1;
-    }
+  const byUser: Record<string, { total: number; cluesSum: number }> = {};
+  for (const row of allAttempts ?? []) {
+    if (!byUser[row.user_id]) byUser[row.user_id] = { total: 0, cluesSum: 0 };
+    byUser[row.user_id].total += 1;
+    byUser[row.user_id].cluesSum += row.clues_revealed;
   }
 
-  // Fetch display names via admin auth API — batched to the solver IDs only
+  const rankedIds = Object.entries(byUser)
+    .sort(([, a], [, b]) => {
+      if (b.total !== a.total) return b.total - a.total;
+      return (a.cluesSum / a.total) - (b.cluesSum / b.total);
+    })
+    .slice(0, 20)
+    .map(([id]) => id);
+
   const userMeta: Record<string, { displayName: string }> = {};
-  if (userIds.length > 0) {
+  if (rankedIds.length > 0) {
     const { data: usersData } = await admin.auth.admin.listUsers({ perPage: 1000 });
     for (const u of usersData?.users ?? []) {
-      if (userIds.includes(u.id)) {
+      if (rankedIds.includes(u.id)) {
         userMeta[u.id] = {
           displayName: formatName(
             u.user_metadata as Record<string, string> | null,
@@ -67,70 +59,82 @@ export async function GET() {
     }
   }
 
-  const leaderboard: LeaderboardEntry[] = solvers.map((row) => ({
-    userId: row.user_id,
-    displayName: userMeta[row.user_id]?.displayName ?? "Player",
-    cluesRevealed: row.clues_revealed,
-    elapsedSeconds: row.elapsed_seconds ?? null,
-    totalSolved: totalSolvedByUser[row.user_id] ?? 1,
+  const allTimeLeaderboard: AllTimeEntry[] = rankedIds.map((id) => ({
+    userId: id,
+    displayName: userMeta[id]?.displayName ?? "Player",
+    totalSolved: byUser[id].total,
+    avgClues: Math.round((byUser[id].cluesSum / byUser[id].total) * 10) / 10,
   }));
 
-  // Community totals
-  const { data: allToday } = await admin
-    .from("attempts")
-    .select("solved")
-    .eq("puzzle_date", today)
-    .not("completed_at", "is", null);
+  // Personal stats — only if signed in
+  let myStats: {
+    totalSolved: number;
+    currentStreak: number;
+    bestStreak: number;
+    avgClues: number;
+    solveDistribution: Record<number, number>;
+  } | null = null;
 
-  const totalPlayed = allToday?.length ?? 0;
-  const totalSolved = allToday?.filter((r) => r.solved).length ?? 0;
-  const solveRate = totalPlayed > 0 ? Math.round((totalSolved / totalPlayed) * 100) : 0;
+  if (user) {
+    const { data: myAttempts } = await admin
+      .from("attempts")
+      .select("puzzle_date, solved, clues_revealed")
+      .eq("user_id", user.id)
+      .not("completed_at", "is", null)
+      .order("puzzle_date", { ascending: true });
 
-  // Solve distribution
-  const { data: distRows } = await admin
-    .from("attempts")
-    .select("clues_revealed")
-    .eq("puzzle_date", today)
-    .eq("solved", true);
+    const rows = myAttempts ?? [];
+    const totalSolved = rows.filter((r) => r.solved).length;
 
-  const solveDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-  for (const row of distRows ?? []) {
-    solveDistribution[row.clues_revealed] = (solveDistribution[row.clues_revealed] ?? 0) + 1;
-  }
+    const solveDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let cluesSum = 0;
+    for (const r of rows.filter((r) => r.solved)) {
+      solveDistribution[r.clues_revealed] = (solveDistribution[r.clues_revealed] ?? 0) + 1;
+      cluesSum += r.clues_revealed;
+    }
+    const avgClues = totalSolved > 0
+      ? Math.round((cluesSum / totalSolved) * 10) / 10
+      : 0;
 
-  // Current user's result for highlighting + time stat
-  let myCluesRevealed: number | null = null;
-  let mySolved: boolean | null = null;
-  let myElapsedSeconds: number | null = null;
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: mine } = await admin
-        .from("attempts")
-        .select("solved, clues_revealed, elapsed_seconds")
-        .eq("user_id", user.id)
-        .eq("puzzle_date", today)
-        .maybeSingle();
-      if (mine) {
-        myCluesRevealed = mine.clues_revealed;
-        mySolved = mine.solved;
-        myElapsedSeconds = mine.elapsed_seconds ?? null;
+    // Streak: consecutive solved days ending at (or before) today
+    const today = new Date().toISOString().slice(0, 10);
+    const solvedDates = new Set(rows.filter((r) => r.solved).map((r) => r.puzzle_date));
+
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let streak = 0;
+    let prev: string | null = null;
+
+    // Walk forward through all completed dates (solved or not)
+    const allDates = rows.map((r) => r.puzzle_date).sort();
+    for (const date of allDates) {
+      if (solvedDates.has(date)) {
+        if (prev === null) {
+          streak = 1;
+        } else {
+          const d1 = new Date(prev);
+          const d2 = new Date(date);
+          const diffDays = Math.round((d2.getTime() - d1.getTime()) / 86400000);
+          streak = diffDays === 1 ? streak + 1 : 1;
+        }
+        prev = date;
+        if (streak > bestStreak) bestStreak = streak;
+      } else {
+        streak = 0;
+        prev = date;
       }
     }
-  } catch {
-    // Non-fatal
+
+    // currentStreak only counts if the streak reaches today or yesterday
+    // (missing today is fine if they haven't played yet)
+    const yesterday = new Date(new Date(today).getTime() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const streakIsActive = prev === today || prev === yesterday;
+    currentStreak = streakIsActive ? streak : 0;
+
+    myStats = { totalSolved, currentStreak, bestStreak, avgClues, solveDistribution };
   }
 
-  return NextResponse.json({
-    date: today,
-    totalPlayed,
-    totalSolved,
-    solveRate,
-    solveDistribution,
-    leaderboard,
-    myCluesRevealed,
-    mySolved,
-    myElapsedSeconds,
-  });
+  return NextResponse.json({ allTimeLeaderboard, myStats });
 }

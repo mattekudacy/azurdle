@@ -27,6 +27,7 @@ export default function StatsButton() {
     return () => subscription.unsubscribe();
   }, [pendingStatsReopen]);
 
+
   function handleClick() {
     if (user) {
       setStatsOpen(true);
@@ -51,6 +52,7 @@ export default function StatsButton() {
       <StatsModal
         open={statsOpen}
         onClose={() => setStatsOpen(false)}
+        myUserId={user?.id ?? null}
       />
       <AuthModal
         open={authOpen}

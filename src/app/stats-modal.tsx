@@ -5,25 +5,24 @@ import styles from "./stats-modal.module.css";
 import { CloseIcon } from "./icons";
 import { getLocalProgress } from "@/lib/local-progress";
 
-type LeaderboardEntry = {
+type AllTimeEntry = {
   userId: string;
   displayName: string;
-  cluesRevealed: number;
-  elapsedSeconds: number | null;
   totalSolved: number;
+  avgClues: number;
+};
+
+type MyStats = {
+  totalSolved: number;
+  currentStreak: number;
+  bestStreak: number;
+  avgClues: number;
+  solveDistribution: Record<number, number>;
 };
 
 type StatsData = {
-  date: string;
-  totalPlayed: number;
-  totalSolved: number;
-  solveRate: number;
-  solveDistribution: Record<number, number>;
-  leaderboard: LeaderboardEntry[];
-  myCluesRevealed: number | null;
-  mySolved: boolean | null;
-  myElapsedSeconds: number | null;
-  todayElapsedSeconds?: number;
+  allTimeLeaderboard: AllTimeEntry[];
+  myStats: MyStats | null;
 };
 
 type State =
@@ -35,19 +34,14 @@ type State =
 type Props = {
   open: boolean;
   onClose: () => void;
+  myUserId?: string | null;
 };
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-export default function StatsModal({ open, onClose }: Props) {
+export default function StatsModal({ open, onClose, myUserId }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [state, setState] = useState<State>({ status: "idle" });
 
@@ -74,21 +68,20 @@ export default function StatsModal({ open, onClose }: Props) {
         if (!res.ok) { setState({ status: "error" }); return; }
         const data: StatsData = await res.json();
 
-        // Merge local result for anon users
-        if (data.myCluesRevealed === null) {
+        // Merge local solve distribution for guests
+        if (!data.myStats) {
           const local = getLocalProgress(todayDate());
-          if (local?.gameOver) {
-            data.myCluesRevealed = local.revealedDuringPlay ?? local.clues.length;
-            data.mySolved = local.solved;
+          if (local?.gameOver && local.solved) {
+            const clue = local.revealedDuringPlay ?? local.clues.length;
+            data.myStats = {
+              totalSolved: 1,
+              currentStreak: 1,
+              bestStreak: 1,
+              avgClues: clue,
+              solveDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, [clue]: 1 },
+            };
           }
         }
-
-        // Today's elapsed time — prefer localStorage (most accurate for this
-        // device), fall back to server value (covers cross-device completions).
-        const local = getLocalProgress(todayDate());
-        data.todayElapsedSeconds =
-          (local?.gameOver ? local.elapsedSeconds : undefined) ??
-          (data.myElapsedSeconds ?? undefined);
 
         setState({ status: "ok", data });
       })
@@ -105,7 +98,8 @@ export default function StatsModal({ open, onClose }: Props) {
   }
 
   const data = state.status === "ok" ? state.data : null;
-  const maxCount = data ? Math.max(1, ...Object.values(data.solveDistribution)) : 1;
+  const my = data?.myStats ?? null;
+  const maxCount = my ? Math.max(1, ...Object.values(my.solveDistribution)) : 1;
 
   return (
     <dialog
@@ -115,90 +109,95 @@ export default function StatsModal({ open, onClose }: Props) {
       onClick={handleDialogClick}
     >
       <div className={styles.header}>
-        <h2 id="stats-modal-title" className={styles.title}>Today&apos;s Stats</h2>
+        <h2 id="stats-modal-title" className={styles.title}>Your Stats</h2>
         <button type="button" aria-label="Close" className={styles.close} onClick={onClose}>
           <CloseIcon />
         </button>
       </div>
 
-      {state.status === "idle" || state.status === "loading" ? (
+      {(state.status === "idle" || state.status === "loading") && (
         <p className={styles.message}>Loading…</p>
-      ) : state.status === "error" ? (
+      )}
+      {state.status === "error" && (
         <p className={styles.message}>Couldn&apos;t load stats.</p>
-      ) : (
+      )}
+
+      {state.status === "ok" && (
         <>
-          {/* Summary numbers */}
-          <div className={styles.grid}>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>{data!.totalPlayed}</span>
-              <span className={styles.statLabel}>Players</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>{data!.solveRate}%</span>
-              <span className={styles.statLabel}>Solved</span>
-            </div>
-            {data!.todayElapsedSeconds !== undefined && (
-              <div className={styles.stat}>
-                <span className={styles.statValue}>{formatTime(data!.todayElapsedSeconds)}</span>
-                <span className={styles.statLabel}>Your Time</span>
-              </div>
-            )}
-          </div>
-
-          {/* Solve distribution */}
-          <div className={styles.distribution}>
-            <p className={styles.distributionTitle}>Solve Distribution</p>
-            {[1, 2, 3, 4, 5].map((clue) => {
-              const count = data!.solveDistribution[clue] ?? 0;
-              const widthPct = Math.round((count / maxCount) * 100);
-              const isMe = data!.myCluesRevealed === clue && data!.mySolved;
-              return (
-                <div key={clue} className={styles.barRow}>
-                  <span className={styles.barLabel}>Clue {clue}</span>
-                  <div className={styles.barTrack} role="img" aria-label={`Clue ${clue}: ${count}`}>
-                    <div
-                      className={`${styles.barFill} ${isMe ? styles.barFillMe : ""}`}
-                      style={{ width: count === 0 ? "4px" : `${widthPct}%` }}
-                    />
-                  </div>
-                  <span className={`${styles.barCount} ${isMe ? styles.barCountMe : ""}`}>
-                    {count}{isMe ? " ✓" : ""}
-                  </span>
+          {my ? (
+            <>
+              {/* Personal numbers */}
+              <div className={styles.grid}>
+                <div className={styles.stat}>
+                  <span className={styles.statValue}>{my.totalSolved}</span>
+                  <span className={styles.statLabel}>Solved</span>
                 </div>
-              );
-            })}
-          </div>
+                <div className={styles.stat}>
+                  <span className={styles.statValue}>{my.currentStreak}</span>
+                  <span className={styles.statLabel}>Streak</span>
+                </div>
+                <div className={styles.stat}>
+                  <span className={styles.statValue}>{my.bestStreak}</span>
+                  <span className={styles.statLabel}>Best Streak</span>
+                </div>
+                <div className={styles.stat}>
+                  <span className={styles.statValue}>{my.avgClues}</span>
+                  <span className={styles.statLabel}>Avg Clues</span>
+                </div>
+              </div>
 
-          {/* Leaderboard */}
-          {data!.leaderboard.length > 0 && (
+              {/* Personal solve distribution */}
+              <div className={styles.distribution}>
+                <p className={styles.distributionTitle}>Your Solve Distribution</p>
+                {[1, 2, 3, 4, 5].map((clue) => {
+                  const count = my.solveDistribution[clue] ?? 0;
+                  const widthPct = Math.round((count / maxCount) * 100);
+                  return (
+                    <div key={clue} className={styles.barRow}>
+                      <span className={styles.barLabel}>Clue {clue}</span>
+                      <div className={styles.barTrack} role="img" aria-label={`Clue ${clue}: ${count}`}>
+                        <div
+                          className={styles.barFill}
+                          style={{ width: count === 0 ? "4px" : `${widthPct}%` }}
+                        />
+                      </div>
+                      <span className={styles.barCount}>{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <p className={styles.message}>Sign in to track your personal stats.</p>
+          )}
+
+          {/* All-time leaderboard */}
+          {data!.allTimeLeaderboard.length > 0 && (
             <div className={styles.leaderboard}>
-              <p className={styles.distributionTitle}>Solvers</p>
+              <p className={styles.distributionTitle}>All-Time Leaderboard</p>
               <div className={styles.leaderboardHeader}>
                 <span>Player</span>
-                <span>Clue</span>
-                <span>Time</span>
-                <span>Total</span>
+                <span>Solved</span>
+                <span>Avg Clue</span>
               </div>
               <ul className={styles.leaderboardList}>
-                {data!.leaderboard.map((entry, i) => (
-                  <li key={entry.userId} className={styles.leaderboardRow}>
-                    <span className={styles.leaderboardRank}>{i + 1}</span>
-                    <span className={styles.leaderboardName}>{entry.displayName}</span>
-                    <span className={styles.leaderboardClue}>#{entry.cluesRevealed}</span>
-                    <span className={styles.leaderboardTime}>
-                      {entry.elapsedSeconds != null ? formatTime(entry.elapsedSeconds) : "—"}
-                    </span>
-                    <span className={styles.leaderboardTotal}>{entry.totalSolved}</span>
-                  </li>
-                ))}
+                {data!.allTimeLeaderboard.map((entry, i) => {
+                  const isMe = myUserId && entry.userId === myUserId;
+                  return (
+                    <li
+                      key={entry.userId}
+                      className={`${styles.leaderboardRow} ${isMe ? styles.leaderboardRowMe : ""}`}
+                    >
+                      <span className={styles.leaderboardRank}>{i + 1}</span>
+                      <span className={styles.leaderboardName}>{entry.displayName}</span>
+                      <span className={styles.leaderboardClue}>{entry.totalSolved}</span>
+                      <span className={styles.leaderboardTime}>{entry.avgClues}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
-
-          {data!.leaderboard.length === 0 && (
-            <p className={styles.message}>No one has solved today&apos;s puzzle yet. Be the first!</p>
-          )}
-
         </>
       )}
     </dialog>
