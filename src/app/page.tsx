@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import styles from "./page.module.css";
 import GameBoard from "./game-board";
@@ -21,15 +22,16 @@ export default function Home() {
           <span className={styles.topbarTitle}>Azurdle</span>
         </div>
         <span className={styles.topbarDivider} aria-hidden="true" />
-        <span className={styles.topbarBadge}>Cloudshell: Live</span>
-        <div className={styles.topbarRight}>
+<div className={styles.topbarRight}>
           <ComingSoonNav />
           <HowToPlay />
           <AuthButton />
         </div>
       </div>
       <main className={styles.main}>
-        <GameBoard />
+        <Suspense>
+          <GameBoard />
+        </Suspense>
       </main>
       <footer className={styles.footer}>
         <div className={styles.footerBrand}>

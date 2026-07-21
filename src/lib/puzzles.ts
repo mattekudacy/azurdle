@@ -81,13 +81,13 @@ export async function serveReservePuzzleForDate(date: string): Promise<PuzzleRow
   return updated;
 }
 
-export async function getArchivePuzzles(beforeDate: string) {
+export async function getArchivePuzzles(upToDate: string) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("puzzles")
     .select("date, number, category")
-    .lt("date", beforeDate)
-    .in("status", ["retired", "live"])
+    .lte("date", upToDate)
+    .in("status", ["queued", "live", "retired"])
     .order("date", { ascending: false });
 
   if (error) throw error;

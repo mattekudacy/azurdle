@@ -26,15 +26,19 @@ export default function AuthButton() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // After OAuth redirect, ?migrated=1 is set — run the migration once.
+  // Migrate any localStorage progress to the server whenever a user is signed
+  // in and local data exists. Covers both the OAuth-redirect path (?migrated=1)
+  // and the edge case where a session is already active (e.g. another tab).
   useEffect(() => {
     if (!user) return;
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has("migrated")) return;
 
-    const url = new URL(window.location.href);
-    url.searchParams.delete("migrated");
-    window.history.replaceState({}, "", url.toString());
+    // Clean up the legacy ?migrated=1 param if present from an OAuth redirect.
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("migrated")) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("migrated");
+      window.history.replaceState({}, "", url.toString());
+    }
 
     const stored = localStorage.getItem("azurdle.v1");
     if (!stored) return;

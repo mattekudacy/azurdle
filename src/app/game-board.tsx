@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./game-board.module.css";
 import AutocompleteInput from "./autocomplete-input";
 import NextPuzzleCountdown from "./next-puzzle-countdown";
@@ -93,7 +94,26 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function utcToday(): string {
+  const d = new Date();
+  return [
+    d.getUTCFullYear(),
+    String(d.getUTCMonth() + 1).padStart(2, "0"),
+    String(d.getUTCDate()).padStart(2, "0"),
+  ].join("-");
+}
+
 export default function GameBoard() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const dateParam = searchParams.get("date");
+  const today = utcToday();
+  // If a valid past/today date is in the URL, play that puzzle; otherwise today.
+  const puzzleDate = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && dateParam <= today
+    ? dateParam
+    : null;
+  const isArchive = puzzleDate !== null && puzzleDate !== today;
+
   const [puzzle, setPuzzle] = useState<TodayPuzzle | null>(null);
   const [progress, setProgress] = useState<LocalProgress | null>(null);
   const [guessInput, setGuessInput] = useState("");
@@ -210,9 +230,10 @@ export default function GameBoard() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/puzzle/today")
+    const url = puzzleDate ? `/api/puzzle/${puzzleDate}` : "/api/puzzle/today";
+    fetch(url)
       .then((res) => {
-        if (!res.ok) throw new Error("failed to load today's puzzle");
+        if (!res.ok) throw new Error("failed to load puzzle");
         return res.json() as Promise<TodayPuzzle>;
       })
       .then((data) => {
@@ -276,7 +297,7 @@ export default function GameBoard() {
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
-  }, [retryCount]);
+  }, [retryCount, puzzleDate]);
 
   async function submitGuess(guessValue: string) {
     const guess = guessValue.trim();
@@ -365,7 +386,7 @@ export default function GameBoard() {
 
   if (status === "loading") {
     return (
-      <div className={styles.board} aria-busy="true" aria-label="Loading today's puzzle">
+      <div className={styles.board} aria-busy="true" aria-label="Loading puzzle">
         <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
         <div className={styles.skeletonClue} />
         <div className={styles.skeletonClue} />
@@ -376,7 +397,7 @@ export default function GameBoard() {
   if (status === "error" || !puzzle || !progress) {
     return (
       <div className={styles.errorState} role="alert">
-        <p>Couldn&apos;t load today&apos;s puzzle.</p>
+        <p>Couldn&apos;t load {isArchive ? "that puzzle" : "today&apos;s puzzle"}.</p>
         <button
           type="button"
           className={styles.retryButton}
@@ -387,6 +408,15 @@ export default function GameBoard() {
         >
           Try again
         </button>
+        {isArchive && (
+          <button
+            type="button"
+            className={styles.retryButton}
+            onClick={() => router.push("/")}
+          >
+            Back to today
+          </button>
+        )}
       </div>
     );
   }
@@ -398,6 +428,14 @@ export default function GameBoard() {
   return (
     <div className={styles.board}>
       <div className={styles.boardHeader}>
+        {isArchive && (
+          <div className={styles.archiveBar}>
+            <button type="button" className={styles.archiveBack} onClick={() => router.push("/")}>
+              ← Today&apos;s puzzle
+            </button>
+            <span className={styles.archiveDateLabel}>{puzzle.date}</span>
+          </div>
+        )}
         <h1 className={styles.title}>
           Azurdle #{puzzle.number} <span>{puzzle.category}</span>
         </h1>
@@ -567,7 +605,6 @@ export default function GameBoard() {
             <div className={styles.cloudLogLabel}>
               <HistoryIcon />
               <span>Cloud Log</span>
-              {!progress.gameOver && <span className={styles.liveFeed}>LIVE FEED</span>}
             </div>
             {progress.guesses.length > 0 || progress.gameOver ? (
               <ul className={styles.guessList}>

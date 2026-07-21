@@ -12,6 +12,38 @@
   gap: 24px;
 }
 
+.archiveBar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: 4px;
+}
+
+.archiveBack {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.archiveBack:hover {
+  text-decoration: underline;
+}
+
+.archiveDateLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
 .title {
   color: var(--ink);
   font-size: clamp(38px, 4.2vw, 48px);
