@@ -1,6 +1,6 @@
 .dialog {
-  width: min(420px, calc(100vw - var(--space-lg)));
-  max-height: min(560px, calc(100vh - var(--space-xl)));
+  width: min(560px, calc(100vw - var(--space-lg)));
+  max-height: min(700px, calc(100vh - var(--space-xl)));
   margin: auto;
   overflow-y: auto;
   padding: var(--space-lg);
@@ -219,38 +219,44 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-sm);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
   margin-bottom: var(--space-lg);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 4px;
+  padding: var(--space-sm) 0;
+  border-radius: var(--radius-md);
+  background: var(--surface);
 }
 
 .statValue {
   font-family: var(--font-ibm-plex-mono), var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 36px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   line-height: 1;
   color: var(--ink);
 }
 
 .statLabel {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-align: center;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 
 .distribution {
   padding-top: var(--space-md);
-  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);

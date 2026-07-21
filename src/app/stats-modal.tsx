@@ -176,6 +176,7 @@ export default function StatsModal({ open, onClose, myUserId }: Props) {
             <div className={styles.leaderboard}>
               <p className={styles.distributionTitle}>All-Time Leaderboard</p>
               <div className={styles.leaderboardHeader}>
+                <span></span>
                 <span>Player</span>
                 <span>Solved</span>
                 <span>Avg Clue</span>
