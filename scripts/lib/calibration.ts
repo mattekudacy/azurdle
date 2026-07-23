@@ -39,7 +39,11 @@ function containsAnswerName(puzzle: Puzzle): string | null {
   for (let i = 0; i < puzzle.clues.length; i++) {
     const clue = puzzle.clues[i].toLowerCase();
     for (const term of terms) {
-      if (term.length > 2 && clue.includes(term)) {
+      if (term.length <= 2) continue;
+      // Word-boundary match to avoid false positives where a short abbreviation
+      // (e.g. "ACI") appears as a substring inside an unrelated word ("capacity").
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      if (new RegExp(`\\b${escaped}\\b`).test(clue)) {
         return `Clue ${i + 1} contains the answer name "${term}" verbatim`;
       }
     }
